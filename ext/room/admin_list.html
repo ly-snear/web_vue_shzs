@@ -1,0 +1,865 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="Cache-Control" content="no-cache"/>
+    <meta name="format-detection" content="telephone=no"/>
+    <meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black"/>
+    <meta name="renderer" content="webkit"/>
+    <meta name="screen-orientation" content="portrait"/>
+    <meta name="x5-orientation" content="portrait"/>
+    <meta name="full-screen" content="yes"/>
+    <meta name="x5-fullscreen" content="true"/>
+    <meta name="apple-touch-fullscreen" content="yes"/>
+    <meta name="msapplication-tap-highlight" content="no"/>
+    <meta name="keywords" content=""/>
+    <meta name="description" content=""/>
+    <meta name="author" content="fxg_ang@126.com"/>
+    <meta name="copyright" content="北京讷纳渔"/>
+    <meta name="location" content="provice=四川; city=成都"/>
+    <title>管理员--教室管理</title>
+    <!-- 导入图标 -->
+    <link rel="shortcut icon" href="/favicon.ico">
+    <!-- 导入图标库 -->
+    <link rel="stylesheet" type="text/css" href="/assets/font/iconfont.css"/>
+    <!-- 导入app样式 -->
+    <link rel="stylesheet" type="text/css" href="/assets/css/app.css"/>
+    <!-- 导入本页样式 -->
+    <link rel="stylesheet" type="text/css" href="/room/admin_list.css"/>
+    <!-- 导入element样式 -->
+    <link rel="stylesheet" type="text/css" href="/assets/js/element/index.css"/>
+    <!-- 导入vue脚本 -->
+    <script type="text/javascript" src="/assets/js/vue/vue.js"></script>
+    <!-- 导入element脚本 -->
+    <script type="text/javascript" src="/assets/js/element/index.js"></script>
+    <!-- 导入tinymce脚本 -->
+    <script type="text/javascript" src="/assets/js/tinymce/tinymce-vue.min.js"></script>
+</head>
+<body>
+<div id="app">
+    <!-- App标题 -->
+    <el-row id="app_title" align="middle" justify="center">
+        <el-col :span="1">
+            <el-button type="primary" class="icon_return iconfont icon-youjiantou1" circle
+                       @click="return_system"></el-button>
+        </el-col>
+        <el-col :span="23">
+            <div class="title_text">{{title}}</div>
+        </el-col>
+    </el-row>
+    <!-- 参数 -->
+    <el-row id="room_param">
+        <el-col :span="12">
+            <organization :user="user" :orgs="org" @change="organization_value"></organization>
+        </el-col>
+        <el-col class="el_col" :span="4">
+            <el-select v-model="room_type_result" class="m-2" :placeholder="room_type_title" size="large">
+                <el-option v-for="item in room_type" :key="item.value" :label="item.label"
+                           :value="item.value"></el-option>
+            </el-select>
+        </el-col>
+        <el-col class="el_col" :span="4">
+            <el-input v-model="room_name" class="m-2" :placeholder="room_name_title" size="large">
+                <template #suffix>
+                    <el-button type="primary" class="iconfont icon-search" circle @click="getRoomItemList"></el-button>
+                </template>
+            </el-input>
+        </el-col>
+        <el-col class="el_col" :span="1" :offset="1">
+            <div class="el_button_box">
+                <div>
+                    <el-button type="success" class="iconfont icon-76xinzeng" circle @click="addRoom"></el-button>
+                </div>
+                <div>
+                    <el-button type="danger" class="iconfont icon-shanchu2" circle @click="deleteRooms"></el-button>
+                </div>
+            </div>
+        </el-col>
+    </el-row>
+    <!-- 教室列表标题 -->
+    <el-row id="room_title" class="el_title" :gutter="5">
+        <el-col :span="1">
+            <el-checkbox v-model="room_list_row_checkbox" :label="room_list_row_checkbox?'取消':'全选'" size="large"
+                         @change="selectAll"/>
+        </el-col>
+        <el-col :span="item.width" v-for="item in room_list_title">
+            <div class="el_row_col" :style="'text-align:' + item.align_text">{{item.title}}</div>
+        </el-col>
+    </el-row>
+    <!-- 教室列表 -->
+    <el-scrollbar :style="'height: calc(100vh - ' + head_height + 'px)'">
+        <el-row class="el_title_item" :gutter="5" :data-id="item.id" v-for="(item,index) in room_list_item">
+            <el-col :span="1">
+                <el-checkbox v-model="room_list_item[index].checkbox" size="large"/>
+            </el-col>
+            <el-col :span="room_list_title[0].width">
+                <div class="el_row_col" :style="'text-align:' + room_list_title[0].align_text">{{item.name}}</div>
+            </el-col>
+            <el-col :span="room_list_title[1].width">
+                <div class="el_row_col" :style="'text-align:' + room_list_title[1].align_text">{{item.camera}}</div>
+            </el-col>
+            <el-col :span="room_list_title[2].width">
+                <div class="el_row_col" :style="'text-align:' + room_list_title[2].align_text">{{item.seats}}</div>
+            </el-col>
+            <el-col :span="room_list_title[3].width">
+                <div class="el_row_col" :style="'text-align:' + room_list_title[3].align_text">{{item.cols}}</div>
+            </el-col>
+            <el-col :span="room_list_title[4].width">
+                <div class="el_room_item_menu_box" style="text-align:left">
+                    <div v-for="menu in item.menu">
+                        <el-tooltip class="box-item" effect="dark" :content="menu.title" placement="bottom">
+                            <el-button type="success" :class="'iconfont ' + menu.icon"
+                                       :data-menu="menu.id" :data-id="item.id" circle
+                                       @click.stop="execMethod"></el-button>
+                        </el-tooltip>
+                    </div>
+                </div>
+            </el-col>
+        </el-row>
+    </el-scrollbar>
+    <!-- 教室编辑器.开始 -->
+    <el-dialog v-model="room_editor.open" width="80%" :show-close="false" :close-on-press-escape="false"
+               :before-close="close_editor" draggable @open="editor_room_open">
+        <template #header>
+            <el-row>
+                <el-col :span="20">
+                    <div class="el_editor_title">{{room_editor.title}}</div>
+                </el-col>
+                <el-col :span="2">
+                    <el-button type="primary" @click="save_room_verify">保存
+                        <el-icon class="el_editor_title_icon iconfont icon-xiugai2"></el-icon>
+                    </el-button>
+                </el-col>
+                <el-col :span="2">
+                    <el-button type="danger" @click="close_room_editor">关闭
+                        <el-icon class="el_editor_title_icon iconfont icon-shanchu2"></el-icon>
+                    </el-button>
+                </el-col>
+            </el-row>
+        </template>
+        <!--城市、区县、学校、类型-->
+        <el-row>
+            <el-col :span="4">
+                <div class="el_editor_org">{{room_editor.city}}</div>
+            </el-col>
+            <el-col :span="4">
+                <div class="el_editor_org">{{room_editor.zone}}</div>
+            </el-col>
+            <el-col :span="4">
+                <div class="el_editor_org">{{room_editor.school}}</div>
+            </el-col>
+            <el-col :span="4" :offset="1">
+                <el-select v-model="room_editor.type_result" class="m-2" :placeholder="room_type_title" size="large">
+                    <el-option v-for="item in room_editor.type_title" :key="item.value" :label="item.label"
+                               :value="item.value"></el-option>
+                </el-select>
+            </el-col>
+        </el-row>
+        <!-- 教室名称 -->
+        <el-row class="el_editor_row">
+            <el-col :span="2">
+                <div class="el_editor_item_title"><span class="el_editor_item_title_require">*</span><span
+                        class="icon_return">教室名称：</span></div>
+            </el-col>
+            <el-col :span="20">
+                <el-input type="text" input-style="el_editor_item_input" :clearable="true"
+                          v-model="room_editor.name_room" size="large" placeholder="录入教室名称"/>
+            </el-col>
+        </el-row>
+        <!-- 教室位置 -->
+        <el-row class="el_editor_row">
+            <el-col :span="2">
+                <div class="el_editor_item_title"><span class="icon_return">教室位置：</span></div>
+            </el-col>
+            <el-col :span="20">
+                <el-input type="text" input-style="el_editor_item_input" :clearable="true"
+                          v-model="room_editor.location_room" size="large" placeholder="录入教室位置"/>
+            </el-col>
+        </el-row>
+        <!-- 教室坐位 坐位列数 -->
+        <el-row class="el_editor_row">
+            <el-col :span="2">
+                <div class="el_editor_item_title"><span class="el_editor_item_title_require">*</span><span
+                        class="icon_return">坐位数量：</span></div>
+            </el-col>
+            <el-col :span="8">
+                <el-input type="number" input-style="el_editor_item_input" :clearable="true"
+                          v-model="room_editor.seats_room" size="large" placeholder="录入教室坐位数量"/>
+            </el-col>
+            <el-col :span="2" :offset="2">
+                <div class="el_editor_item_title"><span class="el_editor_item_title_require">*</span><span
+                        class="icon_return">坐位列数：</span></div>
+            </el-col>
+            <el-col :span="8">
+                <el-input type="number" input-style="el_editor_item_input" :clearable="true"
+                          v-model="room_editor.cols_room" size="large" placeholder="录入教室坐位列数"/>
+            </el-col>
+        </el-row>
+        <!-- 教室头像 教室描述 -->
+        <el-row class="el_editor_row">
+            <el-col :span="11" class="el_editor_item_caption">教室头像</el-col>
+            <el-col :span="11" class="el_editor_item_caption">教室描述</el-col>
+        </el-row>
+        <el-row class="el_editor_row_vertical">
+            <el-col :span="11" class="el_editor_item_head_col">
+                <el-image class="el_editor_item_head" :src="room_editor.head_room" lazy
+                          @click="select_room_head"></el-image>
+            </el-col>
+            <el-col :span="11" class="el_editor_item_head_col">
+                <editor api-key="r87fh0h9ntqra18lnvc32ia5603cynntgv6xyhmbsvqs3hbx" :init="tinymce"
+                        v-model="room_editor.desc_room"/>
+            </el-col>
+        </el-row>
+    </el-dialog>
+    <!-- 教室编辑器.结束 -->
+    <!-- 摄像机编辑器.开始 -->
+    <el-dialog v-model="camera_editor.open" width="90%" :show-close="false" :close-on-press-escape="false"
+               :before-close="close_editor" draggable @open="editor_camera_open">
+        <!-- 标题 -->
+        <template #header>
+            <el-row>
+                <el-col :span="16">
+                    <div class="el_editor_title">{{camera_editor.title}}</div>
+                </el-col>
+                <el-col :span="2">
+                    <el-button type="primary" @click="roomCameraAdd">新增
+                        <el-icon class="el_editor_title_icon iconfont icon-76xinzeng"></el-icon>
+                    </el-button>
+                </el-col>
+                <el-col :span="2">
+                    <el-button type="primary" @click="save_room_camera_verify">保存
+                        <el-icon class="el_editor_title_icon iconfont icon-xiugai2"></el-icon>
+                    </el-button>
+                </el-col>
+                <el-col :span="2">
+                    <el-button type="danger" @click="roomAllCameraDelete">删除
+                        <el-icon class="el_editor_title_icon iconfont icon-shanchu"></el-icon>
+                    </el-button>
+                </el-col>
+                <el-col :span="2">
+                    <el-button type="danger" @click="close_room_camera_editor">关闭
+                        <el-icon class="el_editor_title_icon iconfont icon-shanchu2"></el-icon>
+                    </el-button>
+                </el-col>
+            </el-row>
+        </template>
+        <!-- 教室信息 -->
+        <!--城市、区县、学校、类型、开始IP、摄像机数量-->
+        <el-row>
+            <el-col :span="3">
+                <div class="el_editor_org">{{camera_editor.city}}</div>
+            </el-col>
+            <el-col :span="3">
+                <div class="el_editor_org">{{camera_editor.zone}}</div>
+            </el-col>
+            <el-col :span="3">
+                <div class="el_editor_org">{{camera_editor.school}}</div>
+            </el-col>
+            <el-col :span="3">
+                <div class="el_editor_org">{{camera_editor.type}}</div>
+            </el-col>
+            <el-col :span="1">
+                <div class="el_editor_org el_editor_org_start_ip">开始IP:</div>
+            </el-col>
+            <el-col :span="2">
+                <!-- el-input type="text" input-style="el_editor_item_input" :clearable="true"  v-model="camera_editor.start" size="large" placeholder="录入摄像机开始IP地址"/ -->
+                <div class="cur_input_box">
+                    <input type="text" v-model="camera_editor.start" placeholder="IP地址"/>
+                </div>
+            </el-col>
+            <el-col :span="1">
+                <div class="el_editor_org el_editor_org_start_ip">摄像机数量:</div>
+            </el-col>
+            <el-col :span="1">
+                <!-- el-input type="text" input-style="el_editor_item_input" :clearable="true"  v-model="camera_editor.start" size="large" placeholder="录入摄像机开始IP地址"/ -->
+                <div class="cur_input_box">
+                    <input type="number" v-model="camera_editor.qty" placeholder="摄像机数量"/>
+                </div>
+            </el-col>
+            <el-col :span="1">
+                <div class="el_editor_org el_editor_org_start_ip">账号:</div>
+            </el-col>
+            <el-col :span="1">
+                <div class="cur_input_box">
+                    <input type="text" v-model="camera_editor.user_name" placeholder="账号"/>
+                </div>
+            </el-col>
+            <el-col :span="1">
+                <div class="el_editor_org el_editor_org_start_ip">密码:</div>
+            </el-col>
+            <el-col :span="1">
+                <div class="cur_input_box">
+                    <input type="text" v-model="camera_editor.user_pass" placeholder="密码"/>
+                </div>
+            </el-col>
+            <el-col :span="1" :offset="1">
+                <el-button type="primary" @click="batchAddRoomCamera">批量新增
+                    <el-icon class="el_editor_title_icon iconfont icon-huabumulu"></el-icon>
+                </el-button>
+            </el-col>
+        </el-row>
+        <!-- 摄像机列表标题 -->
+        <el-row id="room_title" class="el_title" :gutter="5">
+            <el-col :span="1">
+                <el-checkbox v-model="camera_editor.select_all" :label="camera_editor.select_all?'取消':'全选'"
+                             size="large" @change="select_all_room_camera"/>
+            </el-col>
+            <el-col :span="item.width" v-for="item in camera_editor.titles">
+                <div class="el_row_col" :style="'text-align:' + item.align_text">{{item.title}}</div>
+            </el-col>
+        </el-row>
+        <el-scrollbar :style="'height: calc(70vh - ' + head_height + 'px)'">
+            <el-row :class="2==item.state?'el_title_item el_title_item_disabled':1==item.repeat?'el_title_item el_title_item_repeat':'el_title_item' "
+                    :gutter="5"
+                    :data-id="item.id"
+                    v-for="(item,index) in camera_editor.list">
+                <el-col :span="1">
+                    <el-checkbox v-model="camera_editor.list[index].checkbox" size="large"/>
+                </el-col>
+                <!-- ip -->
+                <el-col :span="camera_editor.titles[0].width">
+                    <div class="el_row_col" :style="'text-align:' + camera_editor.titles[0].align_text"
+                         v-if="item.edit">{{item.ip}}
+                    </div>
+                    <div class="el_row_col item_input_box" v-if="!item.edit">
+                        <input type="text" v-model="camera_editor.list[index].ip"/>
+                    </div>
+                </el-col>
+                <!-- 用户 -->
+                <el-col :span="camera_editor.titles[1].width">
+                    <div class="el_row_col" :style="'text-align:' + camera_editor.titles[1].align_text"
+                         v-if="item.edit">
+                        {{item.user_encrypt}}
+                    </div>
+                    <div class="el_row_col item_input_box" v-if="!item.edit">
+                        <input type="text" v-model="camera_editor.list[index].user"/>
+                    </div>
+                </el-col>
+                <!-- 密码 -->
+                <el-col :span="camera_editor.titles[2].width">
+                    <div class="el_row_col" :style="'text-align:' + camera_editor.titles[2].align_text"
+                         v-if="item.edit">
+                        {{item.password_encrypt}}
+                    </div>
+                    <div class="el_row_col item_input_box" v-if="!item.edit">
+                        <input type="text" v-model="camera_editor.list[index].password"/>
+                    </div>
+                </el-col>
+                <!-- 状态 -->
+                <el-col :span="camera_editor.titles[3].width">
+                    <div class="el_row_col" :style="'text-align:' + camera_editor.titles[3].align_text"
+                         v-if="item.edit">
+                        {{1 == item.state ? '正常' : '禁用'}}
+                    </div>
+                    <div class="el_row_col" v-if="!item.edit">
+                        <el-select v-model="camera_editor.list[index].state" class="m-2"
+                                   :placeholder="camera_editor.state_title" size="default">
+                            <el-option v-for="st in camera_editor.state" :key="st.value" :label="st.label"
+                                       :value="st.value"></el-option>
+                        </el-select>
+                    </div>
+                </el-col>
+                <!-- 操作按钮 -->
+                <el-col :span="room_list_title[4].width">
+                    <div class="el_room_item_menu_box" style="text-align:left" v-if="item.edit">
+                        <div v-for="menu in camera_editor.menus">
+                            <el-tooltip class="box-item" effect="dark" :content="menu.title" placement="bottom">
+                                <el-button type="success" :class="'iconfont ' + menu.icon" :data-id="item.id"
+                                           :data-menu="menu.id" :data-index="index" circle
+                                           @click.stop="execCameraMethod"></el-button>
+                            </el-tooltip>
+                        </div>
+                    </div>
+                    <div class="el_room_item_menu_box" style="text-align:left" v-if="!item.edit">
+                        <el-tooltip class="box-item" effect="dark" content="完成" placement="bottom">
+                            <el-button type="success" class="iconfont icon-duihao" :data-id="item.id"
+                                       :data-index="index" circle @click="room_camera_edit_finish"></el-button>
+                        </el-tooltip>
+                    </div>
+                </el-col>
+            </el-row>
+        </el-scrollbar>
+    </el-dialog>
+    <!-- 摄像机编辑器.结束 -->
+    <!-- 小组编辑器.开始 -->
+    <el-dialog v-model="group_editor.open" width="90%" :show-close="false" :close-on-press-escape="false"
+               :before-close="close_editor" draggable @open="editor_group_open">
+        <!-- 标题 -->
+        <template #header>
+            <el-row>
+                <el-col :span="16">
+                    <div class="el_editor_title">{{group_editor.title}}</div>
+                </el-col>
+                <el-col :span="2">
+                    <el-button type="primary" @click="roomGroupAdd">新增
+                        <el-icon class="el_editor_title_icon iconfont icon-76xinzeng"></el-icon>
+                    </el-button>
+                </el-col>
+                <el-col :span="2">
+                    <el-button type="primary" @click="batchSaveRoomGroup">保存
+                        <el-icon class="el_editor_title_icon iconfont icon-xiugai2"></el-icon>
+                    </el-button>
+                </el-col>
+                <el-col :span="2">
+                    <el-button type="danger" @click="roomAllGroupDelete">删除
+                        <el-icon class="el_editor_title_icon iconfont icon-shanchu"></el-icon>
+                    </el-button>
+                </el-col>
+                <el-col :span="2">
+                    <el-button type="danger" @click="close_room_group_editor">关闭
+                        <el-icon class="el_editor_title_icon iconfont icon-shanchu2"></el-icon>
+                    </el-button>
+                </el-col>
+            </el-row>
+        </template>
+        <!--城市、区县、学校、类型、小组数量、每组摄像机数量-->
+        <el-row>
+            <el-col :span="3">
+                <div class="el_editor_org">{{group_editor.city}}</div>
+            </el-col>
+            <el-col :span="3">
+                <div class="el_editor_org">{{group_editor.zone}}</div>
+            </el-col>
+            <el-col :span="3">
+                <div class="el_editor_org">{{group_editor.school}}</div>
+            </el-col>
+            <el-col :span="3">
+                <div class="el_editor_org">{{group_editor.type}}</div>
+            </el-col>
+            <el-col :span="1">
+                <div class="el_editor_org el_editor_org_start_ip">小组数量:</div>
+            </el-col>
+            <el-col :span="2">
+                <div class="cur_input_box">
+                    <input type="text" v-model="group_editor.groups" placeholder="录入小组数量"/>
+                </div>
+            </el-col>
+            <el-col :span="2">
+                <div class="el_editor_org el_editor_org_start_ip">每组摄像机数量:</div>
+            </el-col>
+            <el-col :span="2">
+                <div class="cur_input_box">
+                    <input type="number" v-model="group_editor.group_camera" placeholder="录入每组摄像机数量"/>
+                </div>
+            </el-col>
+            <el-col :span="1" :offset="1">
+                <el-button type="primary" @click="batchAddRoomGroup">批量新增
+                    <el-icon class="el_editor_title_icon iconfont icon-huabumulu"></el-icon>
+                </el-button>
+            </el-col>
+        </el-row>
+        <!-- 小组列表标题 -->
+        <el-row id="room_title" class="el_title" :gutter="5">
+            <el-col :span="1">
+                <el-checkbox v-model="group_editor.select_all" :label="group_editor.select_all?'取消':'全选'"
+                             size="large" @change="select_all_room_group"/>
+            </el-col>
+            <el-col :span="item.width" v-for="item in group_editor.titles">
+                <div class="el_row_col" :style="'text-align:' + item.align_text">{{item.title}}</div>
+            </el-col>
+        </el-row>
+        <!-- 小组列表 -->
+        <el-scrollbar :style="'height: calc(70vh - ' + head_height + 'px)'">
+            <el-row :class="'el_title_item'"
+                    :gutter="5"
+                    :data-id="item.id"
+                    v-for="(item,index) in group_editor.list">
+                <el-col :span="1">
+                    <el-checkbox v-model="group_editor.list[index].checkbox" size="large"/>
+                </el-col>
+                <!-- 小组名称 -->
+                <el-col :span="group_editor.titles[0].width">
+                    <div class="el_row_col" :style="'text-align:' + group_editor.titles[0].align_text"
+                         v-if="!item.edit">{{item.name}}
+                    </div>
+                    <div class="el_row_col item_input_box" v-if="item.edit">
+                        <input type="text" v-model="group_editor.list[index].name"/>
+                    </div>
+                </el-col>
+                <!-- 摄像机 -->
+                <el-col :span="group_editor.titles[1].width">
+                    <div class="el_row_col" :style="'text-align:' + group_editor.titles[1].align_text"
+                         v-if="!item.edit">{{item.ips}}
+                    </div>
+                    <div class="el_row_col" :style="'text-align:' + group_editor.titles[1].align_text" v-if="item.edit">
+                        {{item.ips}}
+                        <div class="group_item_ips">
+                            <!--
+                            <el-tooltip class="box-item" effect="dark" :content="'修改' + item.name + '摄像机'"
+                                        placement="bottom">
+                                 <el-button type="success" class="iconfont icon-xiugai" :data-id="item.id"
+                                           :data-index="index" circle @click.stop="editGroupCamera"></el-button>
+
+                            </el-tooltip>
+                            -->
+                            <el-popover placement="right" :width="310" :title="group_editor.group_camera_title"
+                                        @show="groupCameraSelectData(index, $event)"
+                                        @hide="groupCameraSelectFinish(index, $event)"
+                                        @after-enter="groupCameraSelectRow(index, $event)" trigger="click">
+                                <template #reference>
+                                    <el-button type="success" class="iconfont icon-xiugai" :data-id="item.id"
+                                               :data-index="index" circle @click.stop="editGroupCamera"></el-button>
+                                </template>
+                                <div style="width: 100%;">
+                                    <el-table :data="group_editor.list[index].available" style="width: 100%"
+                                              :ref="'ips_' + index" :row-style="{height: '40'}"
+                                              @selection-change="groupCameraSelectChange(index, $event)">
+                                        <el-table-column type="selection" width="55"></el-table-column>
+                                        <el-table-column prop="ip" label="IP" width="150"></el-table-column>
+                                        <el-table-column prop="title" label="状态" width="100"></el-table-column>
+                                    </el-table>
+                                </div>
+                            </el-popover>
+                        </div>
+                    </div>
+                </el-col>
+                <!-- 操作按钮 -->
+                <el-col :span="group_editor.titles[2].width">
+                    <div class="el_room_item_menu_box" style="text-align:left" v-if="!item.edit">
+                        <div v-for="menu in group_editor.menus">
+                            <el-tooltip class="box-item" effect="dark" :content="menu.title" placement="bottom">
+                                <el-button type="success" :class="'iconfont ' + menu.icon" :data-id="item.id"
+                                           :data-menu="menu.id" :data-index="index" circle
+                                           @click.stop="execGroupMethod"></el-button>
+                            </el-tooltip>
+                        </div>
+                    </div>
+                    <div class="el_room_item_menu_box" style="text-align:left" v-if="item.edit">
+                        <div>
+                            <el-tooltip class="box-item" effect="dark" content="完成" placement="bottom">
+                                <el-button type="success" class="iconfont icon-duihao" :data-id="item.id"
+                                           :data-index="index" circle @click="room_group_edit_finish"></el-button>
+                            </el-tooltip>
+                        </div>
+                    </div>
+                </el-col>
+            </el-row>
+        </el-scrollbar>
+    </el-dialog>
+    <!-- 小组编辑器.结束 -->
+    <!-- 管理员吊顶坐位编辑器.开始 -->
+    <el-dialog v-model="admin_seat_top_editor.open" width="90%" :fullscreen="true" :show-close="false"
+               :close-on-press-escape="false"
+               :before-close="close_editor" draggable @open="editor_admin_seat_top_open">
+        <!-- 标题 -->
+        <template #header>
+            <el-row>
+                <el-col :span="12">
+                    <div class="el_editor_title">{{admin_seat_top_editor.room.name}}--坐位管理</div>
+                </el-col>
+                <el-col :span="2">
+                    <el-button type="primary" @click="batchSaveAdminTopRoomSeat">保存
+                        <el-icon class="el_editor_title_icon iconfont icon-xiugai2"></el-icon>
+                    </el-button>
+                </el-col>
+                <el-col :span="2">
+                    <el-button type="primary" @click="select_all_list_seat">{{admin_seat_top_editor.select_seat_all}}
+                        <el-icon
+                                :class="'el_editor_title_icon iconfont ' + admin_seat_top_editor.select_seat_all_icon"></el-icon>
+                    </el-button>
+                </el-col>
+                <el-col :span="2">
+                    <el-button type="danger" @click="admin_seat_top_select_disabled">禁用
+                        <el-icon class="el_editor_title_icon iconfont icon-jinzhi"></el-icon>
+                    </el-button>
+                </el-col>
+                <el-col :span="2">
+                    <el-button type="success" @click="admin_seat_top_select_enabled">启用
+                        <el-icon class="el_editor_title_icon iconfont icon-qiyong"></el-icon>
+                    </el-button>
+                </el-col>
+                <el-col :span="2">
+                    <el-button type="danger" @click="close_admin_seat_top_editor">关闭
+                        <el-icon class="el_editor_title_icon iconfont icon-shanchu2"></el-icon>
+                    </el-button>
+                </el-col>
+            </el-row>
+        </template>
+        <!--城市、区县、学校、类型、每组座位数、摄像机坐位数-->
+        <el-row>
+            <el-col :span="3">
+                <div class="el_editor_org">{{admin_seat_top_editor.room.name_city}}</div>
+            </el-col>
+            <el-col :span="3">
+                <div class="el_editor_org">{{admin_seat_top_editor.room.name_zone}}</div>
+            </el-col>
+            <el-col :span="3">
+                <div class="el_editor_org">{{admin_seat_top_editor.room.name_school}}</div>
+            </el-col>
+            <el-col :span="3">
+                <div class="el_editor_org">{{admin_seat_top_editor.room.camera}}</div>
+            </el-col>
+            <!--
+            <el-col :span="2">
+                <div class="el_editor_org el_editor_org_start_ip">每摄像机坐位数:</div>
+            </el-col>
+            <el-col :span="1">
+                <div class="cur_input_box">
+                    <input type="number" v-model="admin_seat_top_editor.seat_camera" placeholder="每摄像机坐位数"/>
+                </div>
+            </el-col>
+            -->
+            <el-col :span="2">
+                <div class="el_editor_org el_editor_org_start_ip">每摄像机预置位数:</div>
+            </el-col>
+            <el-col :span="1">
+                <div class="cur_input_box">
+                    <input type="number" v-model="admin_seat_top_editor.camera_presets" placeholder="每摄像机预置位数"/>
+                </div>
+            </el-col>
+            <el-col :span="1" :offset="1">
+                <el-button type="primary" @click="batchAddRoomSeat">批量处理
+                    <el-icon class="el_editor_title_icon iconfont icon-huabumulu"></el-icon>
+                </el-button>
+            </el-col>
+        </el-row>
+        <!-- 教室容器 -->
+        <el-row class="seat_container" :style="'height: calc(100vh - ' + head_height + 'px)'"
+                @mousedown.right.stop="admin_seat_top_mouse_down" @mousemove.stop="admin_seat_top_mouse_move"
+                @mouseup.right.stop="admin_seat_top_mouse_up" @selectstart.prevent @contextmenu.prevent>
+            <!-- 教室内容器 -->
+            <div class="seat_box"
+                 :style="'width: ' + admin_seat_top_editor.seat_container_width + 'px; height: ' + admin_seat_top_editor.seat_container_height + 'px; margin-left: calc(50% - ' + Math.floor(admin_seat_top_editor.seat_container_width/2) + 'px);'">
+                <!-- 讲台 -->
+                <div class="rostrum_box"
+                     :style="'margin-top: ' + admin_seat_top_editor.seat_container_top + 'px; width: 100%; height: ' + admin_seat_top_editor.rostrum_height + 'px;'">
+                    <div class="rostrum"
+                         :style="'margin-left: calc(50% - ' + Math.floor(admin_seat_top_editor.rostrum_width/2) + 'px); width: ' + admin_seat_top_editor.rostrum_width + 'px; height: ' + admin_seat_top_editor.rostrum_height + 'px; line-height: '+admin_seat_top_editor.rostrum_height+'px;'">
+                        讲台
+                    </div>
+                </div>
+                <!-- 坐位 -->
+                <div class="list_box"
+                     :style="'margin-top: ' + admin_seat_top_editor.rostrum_split + 'px; height: ' + (admin_seat_top_editor.seat_box_height*admin_seat_top_editor.seat_rows) + 'px'">
+                    <div :class="item.selected? 'seat_item_box seat_item_box_select' : 'seat_item_box'"
+                         v-for="(item,index) in admin_seat_top_editor.list"
+                         :style="'width: ' + admin_seat_top_editor.seat_box_width + 'px; height: ' + admin_seat_top_editor.seat_box_height + 'px'"
+                         :data-index="index">
+                        <div class="chair_check_box"
+                             :style="'height: ' + admin_seat_top_editor.chair_height + 'px'">
+                            <div class="chair_box">
+                                <div :class="1==item.id_state?'item_chair item_chair_normal':'item_chair item_chair_disabled'"
+                                     :data-index="index"
+                                     :style="'margin-left: ' + admin_seat_top_editor.chair_margin_left + 'px; width: ' + admin_seat_top_editor.chair_width + 'px; line-height: ' + (admin_seat_top_editor.chair_height - 2) + 'px; height: ' + (admin_seat_top_editor.chair_height - 2) + 'px'"
+                                     @click.stop="admin_seat_top_item_toggle">
+                                    <span>{{index + 1}}</span>
+                                </div>
+                            </div>
+                            <div class="check_box" v-if="item.showcheckbox">
+                                <input type="checkbox" v-model="admin_seat_top_editor.list[index].checkbox"
+                                       :data-index="index"
+                                       @click="admin_seat_top_item"/>
+                            </div>
+                        </div>
+                        <el-popover placement="right" :width="400" trigger="click"
+                                    @show="admin_seat_top_set_show(index)" @hide="admin_seat_top_set_hide(index)">
+                            <template #reference>
+                                <div :class="1==item.id_state?'seat_item seat_item_normal':'seat_item seat_item_disabled'"
+                                     :style="'margin-top:' + admin_seat_top_editor.seat_show_split + 'px; width: ' + admin_seat_top_editor.seat_show_width + 'px; line-height: ' + admin_seat_top_editor.seat_show_height + 'px; height: ' + admin_seat_top_editor.seat_show_height + 'px'">
+                                    {{item.name_camera}}/{{item.preset}}
+                                </div>
+                            </template>
+                            <!-- 包含小组管理 -->
+                            <!--
+                            <el-tabs v-model="admin_seat_top_editor.list[index].tabs_active_name" :stretch="true"
+                                     style="height: 340px">
+                                <el-tab-pane label="摄像机" name="camera">
+                                    <el-scrollbar height="300px" class="seat_select_ip_box">
+                                        <div class="seat_select_group_box"
+                                             v-for="(gs,gsi) in admin_seat_top_editor.room_group">
+                                            <div class="seat_select_group">{{gs.name}}</div>
+                                            <div class="seat_select_group_camera_box">
+                                                <div class="seat_select_group_camera_item seat_select_group_camera_item_text"
+                                                     v-for="(cs,csi) in gs.cameras" :data-index="index"
+                                                     :data-group="gsi" :data-camera="csi"
+                                                     @click="admin_seat_top_select_camera">
+                                                    {{cs.camera.ip}}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </el-scrollbar>
+                                </el-tab-pane>
+                                <el-tab-pane label="状态" name="state">
+                                    <el-button type="primary" :data-index="index" @click="admin_seat_top_set_state">
+                                        {{1 == admin_seat_top_editor.list[index].id_state ? '禁用' : '正常'}}
+                                    </el-button>
+                                </el-tab-pane>
+                                <el-tab-pane label="坐位名称" name="name">
+                                    <el-input v-model="admin_seat_top_editor.list[index].name" placeholder="录入坐位名称"
+                                              clearable/>
+                                </el-tab-pane>
+                                <el-tab-pane label="预置位" name="preset">
+                                    <el-input type="number" v-model="admin_seat_top_editor.list[index].preset"
+                                              placeholder="录入坐位预置位"
+                                              clearable @input="admin_seat_top_set_preset(index, $event)"/>
+                                </el-tab-pane>
+                            </el-tabs>
+                            -->
+                            <el-scrollbar height="300px" class="seat_select_ip_box">
+                                <div class="seat_select_camera_item_box seat_select_camera_item_box_text"
+                                     v-for="(cs,cmi) in admin_seat_top_editor.room_camera">
+                                    <div class="seat_select_camera_item_ip">{{cs.ip}}</div>
+                                    <div class="seat_select_camera_item_presets_box"
+                                         :style="'width: ' + (30*admin_seat_top_editor.camera_presets) + 'px'">
+                                        <div :class="(prti==admin_seat_top_editor.list[index].preset && cs.ip==admin_seat_top_editor.list[index].name_camera)?'seat_camera_item_preseted':'seat_select_camera_item_presets'"
+                                             v-for="(presets, prti) in admin_seat_top_editor.camera_presets"
+                                             @click="admin_seat_top_select_camera_result(index, cmi, prti, $event)">
+                                            {{prti}}
+                                        </div>
+                                    </div>
+                                </div>
+                            </el-scrollbar>
+                        </el-popover>
+                    </div>
+                </div>
+            </div>
+        </el-row>
+    </el-dialog>
+    <!-- 管理员吊顶坐位编辑器.结束 -->
+    <!-- 管理员坐位编辑器.开始 -->
+    <el-dialog v-model="admin_seat_sit_editor.open" width="90%" :fullscreen="true" :show-close="false"
+               :close-on-press-escape="false"
+               :before-close="close_editor" draggable @open="editor_admin_seat_sit_open">
+        <!-- 标题 -->
+        <template #header>
+            <el-row>
+                <el-col :span="12">
+                    <div class="el_editor_title">{{admin_seat_sit_editor.room.name}}--坐位管理</div>
+                </el-col>
+                <el-col :span="2">
+                    <el-button type="primary" @click="admin_seat_sit_save">保存
+                        <el-icon class="el_editor_title_icon iconfont icon-xiugai2"></el-icon>
+                    </el-button>
+                </el-col>
+                <el-col :span="2">
+                    <el-button type="primary" @click="admin_seat_sit_select_all">{{admin_seat_sit_editor.select_seat_all}}
+                        <el-icon
+                                :class="'el_editor_title_icon iconfont ' + admin_seat_sit_editor.select_seat_all_icon"></el-icon>
+                    </el-button>
+                </el-col>
+                <el-col :span="2">
+                    <el-button type="danger" @click="admin_seat_sit_select_disabled">禁用
+                        <el-icon class="el_editor_title_icon iconfont icon-jinzhi"></el-icon>
+                    </el-button>
+                </el-col>
+                <el-col :span="2">
+                    <el-button type="success" @click="admin_seat_sit_select_enabled">启用
+                        <el-icon class="el_editor_title_icon iconfont icon-qiyong"></el-icon>
+                    </el-button>
+                </el-col>
+                <el-col :span="2">
+                    <el-button type="danger" @click="close_admin_seat_sit_editor">关闭
+                        <el-icon class="el_editor_title_icon iconfont icon-shanchu2"></el-icon>
+                    </el-button>
+                </el-col>
+            </el-row>
+        </template>
+        <!--城市、区县、学校、类型、开始摄像机IP地址-->
+        <el-row>
+            <el-col :span="3">
+                <div class="el_editor_org">{{admin_seat_sit_editor.room.name_city}}</div>
+            </el-col>
+            <el-col :span="3">
+                <div class="el_editor_org">{{admin_seat_sit_editor.room.name_zone}}</div>
+            </el-col>
+            <el-col :span="3">
+                <div class="el_editor_org">{{admin_seat_sit_editor.room.name_school}}</div>
+            </el-col>
+            <el-col :span="3">
+                <div class="el_editor_org">{{admin_seat_sit_editor.room.camera}}</div>
+            </el-col>
+            <!--
+            <el-col :span="2">
+                <div class="el_editor_org el_editor_org_start_ip">每摄像机坐位数:</div>
+            </el-col>
+            <el-col :span="1">
+                <div class="cur_input_box">
+                    <input type="number" v-model="admin_seat_top_editor.seat_camera" placeholder="每摄像机坐位数"/>
+                </div>
+            </el-col>
+            -->
+            <el-col :span="2">
+                <div class="el_editor_org el_editor_org_start_ip">开始IP:</div>
+            </el-col>
+            <el-col :span="3">
+                <div class="cur_input_box">
+                    <input type="text" v-model="admin_seat_sit_editor.start" placeholder="开始摄像机IP"/>
+                </div>
+            </el-col>
+            <el-col :span="1" :offset="1">
+                <el-button type="primary" @click="admin_seat_sit_batch_allocate_ip">批量新增
+                    <el-icon class="el_editor_title_icon iconfont icon-huabumulu"></el-icon>
+                </el-button>
+            </el-col>
+        </el-row>
+        <!-- 教室容器 -->
+        <el-row class="seat_container" :style="'height: calc(100vh - ' + head_height + 'px)'" @selectstart.prevent
+                @contextmenu.prevent>
+            <!-- 教室内容器 -->
+            <div class="sit_container"
+                 :style="'width: ' + admin_seat_sit_editor.container_width + 'px; height: ' + admin_seat_sit_editor.container_height + 'px; margin-left: calc(50% - ' + Math.floor(admin_seat_sit_editor.container_width/2) + 'px);'">
+                <!-- 讲台 -->
+                <div class="rostrum_box"
+                     :style="'margin-top: ' + admin_seat_sit_editor.rostrum_top + 'px; width: 100%;'">
+                    <div class="rostrum"
+                         :style="'margin-left: calc(50% - ' + Math.floor(admin_seat_sit_editor.rostrum_width/2) + 'px); width: ' + admin_seat_sit_editor.rostrum_width + 'px; height: ' + admin_seat_sit_editor.rostrum_height + 'px; line-height: '+admin_seat_sit_editor.rostrum_height+'px;'">
+                        讲台
+                    </div>
+                </div>
+                <!-- 坐位 -->
+                <div class="list_box"
+                     :style="'margin-top: ' + admin_seat_sit_editor.seat_top + 'px; height: ' + (admin_seat_sit_editor.seat_box_height*admin_seat_sit_editor.seat_rows) + 'px;'">
+                    <div v-for="(item,index) in admin_seat_sit_editor.list"
+                         :class="item.selected? 'seat_item_box seat_item_box_select' : 'seat_item_box'"
+                         :style="'width: ' + admin_seat_sit_editor.seat_box_width + 'px; height: ' + admin_seat_sit_editor.seat_box_height + 'px'"
+                         :data-index="index">
+                        <div class="chair_check_box"
+                             :style="'height: ' + admin_seat_sit_editor.chair_height + 'px'">
+                            <div class="chair_box">
+                                <div :class="1==item.id_state?'item_chair item_chair_normal':'item_chair item_chair_disabled'"
+                                     :data-index="index"
+                                     :style="'margin-left: ' + admin_seat_sit_editor.chair_margin_left + 'px; width: ' + admin_seat_sit_editor.chair_width + 'px; line-height: ' + (admin_seat_sit_editor.chair_height - 2) + 'px; height: ' + (admin_seat_sit_editor.chair_height - 2) + 'px'"
+                                     @click.stop="admin_seat_sit_item_toggle">
+                                    <span>{{index + 1}}</span>
+                                </div>
+                            </div>
+                            <div class="check_box" v-if="item.showcheckbox">
+                                <input type="checkbox" v-model="admin_seat_sit_editor.list[index].checkbox"
+                                       :data-index="index"
+                                       @click="admin_seat_sit_item"/>
+                            </div>
+                        </div>
+                        <div :class="1==item.id_state?'seat_item seat_item_normal':'seat_item seat_item_disabled'"
+                             :style="'margin-top:' + admin_seat_sit_editor.inner_margin + 'px; width: ' + admin_seat_sit_editor.seat_width + 'px; line-height: ' + admin_seat_sit_editor.seat_height + 'px; height: ' + admin_seat_sit_editor.seat_height + 'px'"
+                             contenteditable="true">
+                            <el-input v-model="admin_seat_sit_editor.list[index].ip" placeholder="IP Address"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </el-row>
+    </el-dialog>
+    <!-- 管理员坐位编辑器.结束 -->
+</div>
+<!-- 导入app脚本 -->
+<script type="text/javascript" src="/assets/js/app.js"></script>
+<!-- 导入qs脚本 -->
+<script type="text/javascript" src="/assets/js/axios/qs.js"></script>
+<!-- 导入axios脚本 -->
+<script type="text/javascript" src="/assets/js/axios/axios.js"></script>
+<!-- 导入工具脚本 -->
+<script type="text/javascript" src="/utils/util.js"></script>
+<!-- 导入业务脚本 -->
+<script type="text/javascript" src="/utils/business.js"></script>
+<!-- 导入api脚本 -->
+<script type="text/javascript" src="/utils/api.js"></script>
+<!-- 导入组织机构组件脚本 -->
+<script type="text/javascript" src="/component/organization.js"></script>
+<!-- 导入坐位组件脚本 -->
+<script type="text/javascript" src="/component/seat.js"></script>
+<!-- 导入本页脚本 -->
+<script type="text/javascript" src="/room/admin_list.js"></script>
+</body>
+</html>

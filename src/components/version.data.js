@@ -1,0 +1,32 @@
+export const  version = [
+  [
+    { key: 1, title: "人教版 2012" },
+    { key: 2, title: "人美版 2012" },
+    { key: 3, title: "人美版 2013" },
+    { key: 4, title: "苏少版" },
+    { key: 5, title: "湘美版" },
+    { key: 6, title: "冀美版" },
+    { key: 7, title: "沪教版" },
+    { key: 8, title: "浙美版" },
+    { key: 9, title: "岭南版" },
+    { key: 10, title: "赣美版" },
+    { key: 11, title: "广西版" },
+    { key: 12, title: "辽海版" },
+  ],
+  [
+    { key: 1, title: "人教版" },
+    { key: 2, title: "人美版" },
+    { key: 3, title: "苏少版" },
+    { key: 4, title: "岭美版" },
+    { key: 5, title: "湘美版" },
+    { key: 6, title: "赣美版" },
+    { key: 7, title: "浙美版" },
+  ],
+  [
+    { key: 1, title: "人教版" },
+    { key: 3, title: "人美版" },
+    { key: 4, title: "人美版 2019" },
+    { key: 5, title: "鲁美版" },
+    { key: 6, title: "湘美版" },
+  ],
+];

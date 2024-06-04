@@ -1,0 +1,331 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="Cache-Control" content="no-cache"/>
+    <meta name="format-detection" content="telephone=no"/>
+    <meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black"/>
+    <meta name="renderer" content="webkit"/>
+    <meta name="screen-orientation" content="portrait"/>
+    <meta name="x5-orientation" content="portrait"/>
+    <meta name="full-screen" content="yes"/>
+    <meta name="x5-fullscreen" content="true"/>
+    <meta name="apple-touch-fullscreen" content="yes"/>
+    <meta name="msapplication-tap-highlight" content="no"/>
+    <meta name="keywords" content=""/>
+    <meta name="description" content=""/>
+    <meta name="author" content="fxg_ang@126.com"/>
+    <meta name="copyright" content="北京讷纳渔"/>
+    <meta name="location" content="provice=四川; city=成都"/>
+    <title>学校管理员--课程表管理</title>
+    <!-- 导入图标 -->
+    <link rel="shortcut icon" href="/favicon.ico">
+    <!-- 导入图标库 -->
+    <link rel="stylesheet" type="text/css" href="/assets/font/iconfont.css"/>
+    <!-- 导入app样式 -->
+    <link rel="stylesheet" type="text/css" href="/assets/css/app.css"/>
+    <!-- 导入本页样式 -->
+    <link rel="stylesheet" type="text/css" href="/room/curriculum_list.css"/>
+    <!-- 导入element样式 -->
+    <link rel="stylesheet" type="text/css" href="/assets/js/element/index.css"/>
+    <!-- 导入vue脚本 -->
+    <script type="text/javascript" src="/assets/js/vue/vue.js"></script>
+    <!-- 导入element脚本 -->
+    <script type="text/javascript" src="/assets/js/element/index.js"></script>
+    <!-- 导入tinymce脚本 -->
+    <script type="text/javascript" src="/assets/js/tinymce/tinymce-vue.min.js"></script>
+</head>
+<body>
+<div id="app">
+    <!-- App标题 -->
+    <el-row id="app_title" align="middle" justify="center">
+        <el-col :span="1">
+            <el-button type="primary" class="icon_return iconfont icon-youjiantou1" circle></el-button>
+        </el-col>
+        <el-col :span="23">
+            <div class="title_text app_title_text">{{title}}</div>
+        </el-col>
+    </el-row>
+    <!-- 学校管理员信息 -->
+    <el-row id="app_user_ext">
+        <el-col :span="6">
+            <div class="head_title app_head_title">{{user_ext.name_city}}</div>
+        </el-col>
+        <el-col :span="6">
+            <div class="head_title app_head_title">{{user_ext.name_zone}}</div>
+        </el-col>
+        <el-col :span="6">
+            <div class="head_title app_head_title">{{user_ext.name_school}}</div>
+        </el-col>
+        <el-col :span="6">
+            <div class="head_title app_head_title">{{user_ext.name}}</div>
+        </el-col>
+    </el-row>
+    <!-- 列表搜索条件 -->
+    <el-row id="app_list_search" style="margin-top: 5px;">
+        <el-col :span="2">
+            <el-select v-model="value_class" class="m-2" :placeholder="title_class" size="large" clearable @change="">
+                <el-option v-for="item in list_class" :key="item.value" :label="item.label"
+                           :value="item.value"></el-option>
+            </el-select>
+        </el-col>
+        <el-col :span="2" style="margin-left: 5px;">
+            <el-select v-model="value_min_week" class="m-2" :placeholder="title_min_week" size="large" clearable
+                       @change="">
+                <el-option v-for="item in list_week" :key="item.value" :label="item.label"
+                           :value="item.value"></el-option>
+            </el-select>
+        </el-col>
+        <el-col :span="2" style="margin-left: 5px;">
+            <el-select v-model="value_max_week" class="m-2" :placeholder="title_max_week" size="large" clearable
+                       @change="">
+                <el-option v-for="item in list_week" :key="item.value" :label="item.label"
+                           :value="item.value"></el-option>
+            </el-select>
+        </el-col>
+        <el-col :span="1" style="margin-left: 5px;">
+            <el-select v-model="value_lesson" class="m-2" :placeholder="title_lesson" size="large" clearable
+                       @change="">
+                <el-option v-for="item in list_lesson" :key="item.value" :label="item.label"
+                           :value="item.value"></el-option>
+            </el-select>
+        </el-col>
+        <el-col :span="2" style="margin-left: 5px;">
+            <el-time-select v-model="value_start_min" start="07:00:00" step="00:05:00" end="19:00:00" clearable
+                            format="HH:mm:ss" :placeholder="title_start_min" size="large"/>
+        </el-col>
+        <el-col :span="2" style="margin-left: 5px;">
+            <el-time-select v-model="value_start_max" start="07:00:00" step="00:05:00" end="19:00:00" clearable
+                            format="HH:mm:ss" :placeholder="title_start_max" size="large"/>
+        </el-col>
+        <el-col :span="2" style="margin-left: 5px;">
+            <el-time-select v-model="value_end_min" start="07:00:00" step="00:05:00" end="19:00:00" clearable
+                            format="HH:mm:ss" :placeholder="title_end_min" size="large"/>
+        </el-col>
+        <el-col :span="2" style="margin-left: 5px;">
+            <el-time-select v-model="value_end_max" start="07:00:00" step="00:05:00" end="19:00:00" clearable
+                            format="HH:mm:ss" :placeholder="title_end_max" size="large"/>
+        </el-col>
+        <el-col :span="1" style="margin-left: 5px;">
+            <el-select v-model="value_course" class="m-2" :placeholder="title_course" size="large" clearable
+                       @change="">
+                <el-option v-for="item in list_course" :key="item.value" :label="item.label"
+                           :value="item.value"></el-option>
+            </el-select>
+        </el-col>
+        <el-col :span="2" style="margin-left: 5px;">
+            <el-select v-model="value_room" class="m-2" :placeholder="title_room" size="large" clearable
+                       @change="">
+                <el-option v-for="item in list_room" :key="item.value" :label="item.label"
+                           :value="item.value"></el-option>
+            </el-select>
+        </el-col>
+        <el-col :span="2" style="margin-left: 5px;">
+            <el-select v-model="value_teacher" class="m-2" :placeholder="title_teacher" size="large" clearable
+                       @change="">
+                <el-option v-for="item in list_teacher" :key="item.value" :label="item.label"
+                           :value="item.value"></el-option>
+            </el-select>
+        </el-col>
+        <el-col :span="1" style="margin-left: 5px;">
+            <el-tooltip class="box-item" effect="dark" content="搜索课程列表" placement="bottom">
+                <el-button type="success" class="iconfont icon-search" style="margin-top: 3px" circle
+                           @click="searchCourse"></el-button>
+            </el-tooltip>
+        </el-col>
+        <el-col :span="2" style="margin-left: 5px;">
+            <el-tooltip class="box-item" effect="dark" content="新增课程" placement="bottom">
+                <el-button type="success" class="iconfont icon-xinzeng1" style="margin-top: 3px" circle
+                           @click="addCourse"></el-button>
+            </el-tooltip>
+            <el-tooltip class="box-item" effect="dark" content="删除课程" placement="bottom">
+                <el-button type="success" class="iconfont icon-shanchu6" style="margin-top: 3px" circle
+                           @click="deleteCourses"></el-button>
+            </el-tooltip>
+            <el-tooltip class="box-item" effect="dark" content="导入课程，单击右键下载模板" placement="bottom">
+                <el-button type="success" class="iconfont icon-shangchuan2" style="margin-top: 3px" circle
+                           @click.left="upload_course" @click.right="download_course"></el-button>
+            </el-tooltip>
+        </el-col>
+    </el-row>
+    <!-- 课程表列表标题 -->
+    <el-row id="app_list_title" class="list_title" :gutter="5" style="margin-top: 5px;">
+        <el-col :span="1">
+            <el-checkbox v-model="select_all_checkbox" :label="select_all_checkbox?'取消':'全选'" size="large"
+                         @change="selectAll"/>
+        </el-col>
+        <el-col :span="item.width" v-for="item in list_title">
+            <div class="list_title_head app_head_title" :style="'text-align:' + item.align_text">{{item.title}}</div>
+        </el-col>
+    </el-row>
+    <!-- 课程表列表 -->
+    <el-scrollbar class="list_container" :style="'height: calc(100vh - ' + except_height + 'px); margin-top: 5px;'">
+        <el-row class="course_item" :gutter="5" :data-id-class="item.id_class" :data-week="item.week"
+                :data-lesson="item.lesson" v-for="(item,index) in page_course">
+            <el-col :span="1">
+                <el-checkbox v-model="page_course[index].checkbox" size="large"/>
+            </el-col>
+            <el-col :span="list_title[0].width">
+                <div class="course_item_cell" :style="'text-align:' + list_title[0].align_text">{{item.name_class}}
+                </div>
+            </el-col>
+            <el-col :span="list_title[1].width">
+                <div class="course_item_cell" :style="'text-align:' + list_title[1].align_text">
+                    {{list_week[item.week - 1].label}}
+                </div>
+            </el-col>
+            <el-col :span="list_title[2].width">
+                <div class="course_item_cell" :style="'text-align:' + list_title[2].align_text">
+                    {{list_lesson[item.lesson - 1].label}}
+                </div>
+            </el-col>
+            <el-col :span="list_title[3].width">
+                <div class="course_item_cell" :style="'text-align:' + list_title[3].align_text">
+                    {{item.start}}
+                </div>
+            </el-col>
+            <el-col :span="list_title[4].width">
+                <div class="course_item_cell" :style="'text-align:' + list_title[4].align_text">
+                    {{item.end}}
+                </div>
+            </el-col>
+            <el-col :span="list_title[5].width">
+                <div class="course_item_cell" :style="'text-align:' + list_title[5].align_text">
+                    {{item.course}}
+                </div>
+            </el-col>
+            <el-col :span="list_title[6].width">
+                <div class="course_item_cell" :style="'text-align:' + list_title[6].align_text">
+                    {{item.name_room}}
+                </div>
+            </el-col>
+            <el-col :span="list_title[7].width">
+                <div class="course_item_cell" :style="'text-align:' + list_title[7].align_text">
+                    {{item.name_teacher}}
+                </div>
+            </el-col>
+            <el-col :span="list_title[8].width">
+                <div class="course_item_menu" style="text-align: left">
+                    <div v-for="menu in course_menu">
+                        <el-tooltip class="box-item" effect="dark" :content="menu.title" placement="bottom">
+                            <el-button type="success" :class="'iconfont ' + menu.icon" :data-id="item.id"
+                                       :data-menu="menu.id" :data-idclass="item.id_class" :data-week="item.week"
+                                       :data-lesson="item.lesson" circle @click.stop="execMethod"></el-button>
+                        </el-tooltip>
+                    </div>
+                </div>
+            </el-col>
+        </el-row>
+    </el-scrollbar>
+    <!-- 课程表列表分页器 -->
+    <el-row id="app_list_page" style="margin-top: 5px;">
+        <el-pagination :page-size="size" layout="prev, pager, next" :total="page_data.total"
+                       @current-change="page_goto"/>
+    </el-row>
+    <!-- 课程表编辑器 -->
+    <el-dialog id="course_editor_box" v-model="edit_course.open" :fullscreen="true" :show-close="false"
+               :close-on-press-escape="false" :before-close="edit_course_close_before" @opened="edit_course_opened"
+               draggable
+               @open="edit_course_open">
+        <template id="course_editor_title" #header>
+            <el-row>
+                <el-col :span="16">
+                    <div class="list_title_head app_title_text">{{edit_course.title}}</div>
+                </el-col>
+                <el-col :span="2">
+                    <el-button type="primary" @click="edit_course_save">保存
+                        <el-icon class="el_editor_title_icon iconfont icon-xiugai3"></el-icon>
+                    </el-button>
+                </el-col>
+                <el-col :span="2">
+                    <el-button type="danger" @click="edit_course_close">关闭
+                        <el-icon class="el_editor_title_icon iconfont icon-shanchu2"></el-icon>
+                    </el-button>
+                </el-col>
+            </el-row>
+        </template>
+        <el-row class="course_editor_row" :gutter="5" style="margin-top: 5px;">
+            <el-col :span="4">
+                <el-select v-model="edit_course.id_class" class="m-2" :placeholder="title_class" size="large"
+                           clearable
+                           @change="">
+                    <el-option v-for="item in list_class" :key="item.value" :label="item.label"
+                               :value="item.value"></el-option>
+                </el-select>
+            </el-col>
+            <el-col :span="4" :offset="6">
+                <el-select v-model="edit_course.week" class="m-2" :placeholder="title_min_week" size="large"
+                           clearable
+                           @change="">
+                    <el-option v-for="item in list_week" :key="item.value" :label="item.label"
+                               :value="item.value"></el-option>
+                </el-select>
+            </el-col>
+            <el-col :span="4" :offset="6">
+                <el-select v-model="edit_course.lesson" class="m-2" :placeholder="title_lesson" size="large" clearable
+                           @change="">
+                    <el-option v-for="item in list_lesson" :key="item.value" :label="item.label"
+                               :value="item.value"></el-option>
+                </el-select>
+            </el-col>
+        </el-row>
+        <el-row class="course_editor_row" :gutter="5" style="margin-top: 5px;">
+            <el-col :span="4">
+                <el-time-select v-model="edit_course.start" start="07:00:00" step="00:05:00" end="19:00:00" clearable
+                                format="HH:mm:ss" :placeholder="title_start_time" size="large"/>
+            </el-col>
+            <el-col :span="4" :offset="16">
+                <el-time-select v-model="edit_course.end" start="07:00:00" step="00:05:00" end="19:00:00" clearable
+                                format="HH:mm:ss" :placeholder="title_end_time" size="large"/>
+            </el-col>
+        </el-row>
+        <el-row class="course_editor_row" :gutter="5" style="margin-top: 5px;">
+            <el-col :span="4">
+                <el-select v-model="edit_course.id_course" class="m-2" :placeholder="title_course" size="large" clearable
+                           @change="">
+                    <el-option v-for="item in list_course" :key="item.value" :label="item.label"
+                               :value="item.value"></el-option>
+                </el-select>
+            </el-col>
+            <el-col :span="4" :offset="6">
+                <el-select v-model="edit_course.id_room" class="m-2" :placeholder="title_room" size="large"
+                           clearable
+                           @change="">
+                    <el-option v-for="item in list_room" :key="item.value" :label="item.label"
+                               :value="item.value"></el-option>
+                </el-select>
+            </el-col>
+            <el-col :span="4" :offset="6">
+                <el-select v-model="edit_course.id_teacher" class="m-2" :placeholder="title_teacher" size="large" clearable
+                           @change="">
+                    <el-option v-for="item in list_teacher" :key="item.value" :label="item.label"
+                               :value="item.value"></el-option>
+                </el-select>
+            </el-col>
+        </el-row>
+    </el-dialog>
+</div>
+<!-- 导入xlsx处理库 -->
+<script type="text/javascript" src="/assets/js/sheet/xlsx.full.min.js"></script>
+<!-- 导入app脚本 -->
+<script type="text/javascript" src="/assets/js/app.js"></script>
+<!-- 导入qs脚本 -->
+<script type="text/javascript" src="/assets/js/axios/qs.js"></script>
+<!-- 导入axios脚本 -->
+<script type="text/javascript" src="/assets/js/axios/axios.js"></script>
+<!-- 导入工具脚本 -->
+<script type="text/javascript" src="/utils/util.js"></script>
+<!-- 导入业务脚本 -->
+<script type="text/javascript" src="/utils/business.js"></script>
+<!-- 导入api脚本 -->
+<script type="text/javascript" src="/utils/api.js"></script>
+<!-- 导入组织机构组件脚本 -->
+<script type="text/javascript" src="/component/organization.js"></script>
+<!-- 导入坐位组件脚本 -->
+<script type="text/javascript" src="/component/seat.js"></script>
+<!-- 导入本页脚本 -->
+<script type="text/javascript" src="/room/curriculum_list.js"></script>
+</body>
+</html>

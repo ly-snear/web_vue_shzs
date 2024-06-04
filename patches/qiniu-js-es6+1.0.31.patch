@@ -1,0 +1,13 @@
+diff --git a/node_modules/qiniu-js-es6/src/qiniu.js b/node_modules/qiniu-js-es6/src/qiniu.js
+index f038c19..083af5b 100644
+--- a/node_modules/qiniu-js-es6/src/qiniu.js
++++ b/node_modules/qiniu-js-es6/src/qiniu.js
+@@ -715,7 +715,7 @@ function QiniuJsSDK() {
+                     var serverTime = getTimestamp(new Date(ajax.getResponseHeader("date")));
+                     var clientTime = getTimestamp(new Date());
+                     that.tokenInfo = {
+-                        serverDelay: clientTime - serverTime,
++                        serverDelay: 0,
+                         deadline: putPolicy.deadline,
+                         isExpired: function() {
+                             var leftTime = this.deadline - getTimestamp(new Date()) + this.serverDelay;

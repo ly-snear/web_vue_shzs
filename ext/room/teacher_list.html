@@ -1,0 +1,339 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="Cache-Control" content="no-cache"/>
+    <meta name="format-detection" content="telephone=no"/>
+    <meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black"/>
+    <meta name="renderer" content="webkit"/>
+    <meta name="screen-orientation" content="portrait"/>
+    <meta name="x5-orientation" content="portrait"/>
+    <meta name="full-screen" content="yes"/>
+    <meta name="x5-fullscreen" content="true"/>
+    <meta name="apple-touch-fullscreen" content="yes"/>
+    <meta name="msapplication-tap-highlight" content="no"/>
+    <meta name="keywords" content=""/>
+    <meta name="description" content=""/>
+    <meta name="author" content="fxg_ang@126.com"/>
+    <meta name="copyright" content="北京讷纳渔"/>
+    <meta name="location" content="provice=四川; city=成都"/>
+    <title>教师--教室管理</title>
+    <!-- 导入图标 -->
+    <link rel="shortcut icon" href="/favicon.ico">
+    <!-- 导入图标库 -->
+    <link rel="stylesheet" type="text/css" href="/assets/font/iconfont.css"/>
+    <!-- 导入app样式 -->
+    <link rel="stylesheet" type="text/css" href="/assets/css/app.css"/>
+    <!-- 导入本页样式 -->
+    <link rel="stylesheet" type="text/css" href="/room/teacher_list.css"/>
+    <!-- 导入element样式 -->
+    <link rel="stylesheet" type="text/css" href="/assets/js/element/index.css"/>
+    <!-- 导入vue脚本 -->
+    <script type="text/javascript" src="/assets/js/vue/vue.js"></script>
+    <!-- 导入element脚本 -->
+    <script type="text/javascript" src="/assets/js/element/index.js"></script>
+    <!-- 导入tinymce脚本 -->
+    <script type="text/javascript" src="/assets/js/tinymce/tinymce-vue.min.js"></script>
+</head>
+<body>
+<div id="app">
+    <!-- App标题 -->
+    <el-row id="app_title" align="middle" justify="center">
+        <el-col :span="1">
+            <el-button type="primary" class="icon_return iconfont icon-youjiantou1" circle @click="return_system"></el-button>
+        </el-col>
+        <el-col :span="23">
+            <div class="title_text app_title_text">{{title}}</div>
+        </el-col>
+    </el-row>
+    <!-- 教师信息 -->
+    <el-row id="app_teacher">
+        <el-col :span="5">
+            <div class="head_title app_head_title">{{techer.name_city}}</div>
+        </el-col>
+        <el-col :span="5">
+            <div class="head_title app_head_title">{{techer.name_zone}}</div>
+        </el-col>
+        <el-col :span="5">
+            <div class="head_title app_head_title">{{techer.name_school}}</div>
+        </el-col>
+        <el-col :span="5">
+            <div class="head_title app_head_title">{{techer.name}}</div>
+        </el-col>
+        <el-col :span="4">
+            <div class="head_title app_head_title">{{techer.course}}</div>
+        </el-col>
+    </el-row>
+    <!-- 班级列表标题 -->
+    <el-row id="app_list_title" class="list_title" :gutter="5">
+        <el-col :span="item.width" v-for="item in titles">
+            <div class="list_title_head app_head_title" :style="'text-align:' + item.align_text">{{item.title}}</div>
+        </el-col>
+    </el-row>
+    <!-- 班级列表 -->
+    <el-scrollbar class="list_box"
+                  :style="'height: calc(100vh - ' + head_height + 'px); margin-top: ' + list_top + 'px;'">
+        <el-row class="class_room_item" :gutter="5" v-for="(cr,cri) in class_room">
+            <el-col :span="titles[0].width">
+                <div class="list_title_head app_head_title" :style="'text-align:' + titles[0].align_text">
+                    {{cr.name_class}}
+                </div>
+            </el-col>
+            <el-col :span="titles[1].width">
+                <div class="list_title_head app_head_title" :style="'text-align:' + titles[1].align_text">
+                    {{cr.students}}
+                </div>
+            </el-col>
+            <el-col :span="titles[2].width">
+                <div class="list_title_head app_head_title" :style="'text-align:' + titles[2].align_text">
+                    {{cr.name_room}}
+                </div>
+            </el-col>
+            <el-col :span="titles[3].width">
+                <div class="list_title_head app_head_title" :style="'text-align:' + titles[3].align_text">
+                    {{cr.seats}}
+                </div>
+            </el-col>
+            <el-col :span="titles[4].width">
+                <div class="list_title_head app_head_title" :style="'text-align:' + titles[3].align_text">
+                    {{cr.cols}}
+                </div>
+            </el-col>
+            <el-col :span="titles[5].width">
+                <div class="class_room_item_menu_box" style="text-align:left">
+                    <div v-for="menu in menus">
+                        <el-tooltip effect="dark" :content="menu.title" placement="bottom">
+                            <el-button type="success" :class="'iconfont ' + menu.icon" :data-class="cr.id_class"
+                                       :data-room="cr.id_room"
+                                       :data-menu="menu.id" circle @click.stop="execClassRoomMethod"></el-button>
+                        </el-tooltip>
+                    </div>
+                </div>
+            </el-col>
+        </el-row>
+    </el-scrollbar>
+    <!-- 坐位分配 -->
+    <el-dialog id="seat_editor_box" v-model="seat_editor.open" :fullscreen="true" :show-close="false"
+               :close-on-press-escape="false"
+               :before-close="close_seat_before" @opened="student_seat_opened" draggable @open="student_seat_open">
+        <template id="seat_editor_title" #header>
+            <el-row>
+                <el-col :span="12">
+                    <div class="list_title_head app_title_text">{{seat_editor.title}}</div>
+                </el-col>
+                <el-col :span="2">
+                    <el-button type="primary" @click="class_student_allocate_room_seat">分配
+                        <el-icon class="el_editor_title_icon iconfont icon-xiugai2"></el-icon>
+                    </el-button>
+                </el-col>
+                <el-col :span="2">
+                    <el-button type="primary" @click="select_all_seat_item">{{seat_editor.select_seat_title}}
+                        <el-icon
+                                :class="'el_editor_title_icon iconfont ' + seat_editor.select_seat_icon"></el-icon>
+                    </el-button>
+                </el-col>
+                <el-col :span="2">
+                    <el-popover placement="bottom" :width="200" :visible="seat_editor.popover_close" trigger="manual"
+                                @show="" @hide="">
+                        <template #reference>
+                            <el-button type="primary" @click.native="room_group_show_toggle">小组
+                                <el-icon class="el_editor_title_icon iconfont icon-xiaozu"></el-icon>
+                            </el-button>
+                        </template>
+                        <div class="group_container">
+                            <div class="group_action">
+                                <div class="group_action_text">
+                                    <el-input v-model="seat_editor.group_title" placeholder="输入小组名称" clearable/>
+                                </div>
+                                <div class="group_action_icon">
+                                    <el-button type="primary" class="group_action_icon_button iconfont icon-qiyong"
+                                               circle @click="room_group_add"></el-button>
+                                </div>
+                            </div>
+                            <el-scrollbar class="group_list_box">
+                                <div class="group_item_box" v-for="(g, gi) in seat_editor.student_groups"
+                                     :data-index="gi">
+                                    <div class="group_action_text"
+                                         :style="'background-color: ' + g.color + '; color: #ffffff'">
+                                        <span :data-index="gi" @click="room_group_select">{{g.title}}</span>
+                                    </div>
+                                    <div class="group_action_icon">
+                                        <el-button type="danger" class="group_action_icon_button iconfont icon-shanchu"
+                                                   circle :data-index="gi" @click="room_group_delete"></el-button>
+                                    </div>
+                                    <div class="group_action_icon">
+                                        <el-button :type="g.select_type"
+                                                   :class="'group_action_icon_button iconfont ' + g.select_icon"
+                                                   circle :data-index="gi" @click="room_group_select_seats"></el-button>
+                                    </div>
+                                </div>
+                            </el-scrollbar>
+                        </div>
+                    </el-popover>
+                </el-col>
+                <el-col :span="2">
+                    <el-button type="primary" @click="class_student_save_room_seat">保存
+                        <el-icon class="el_editor_title_icon iconfont icon-baocun"></el-icon>
+                    </el-button>
+                </el-col>
+                <el-col :span="2">
+                    <el-button type="danger" @click="close_seat">关闭
+                        <el-icon class="el_editor_title_icon iconfont icon-shanchu2"></el-icon>
+                    </el-button>
+                </el-col>
+            </el-row>
+        </template>
+        <el-row id="seat_editor_podium" class="podium_box">
+            <div id="seat_editor_podium_title">讲台</div>
+        </el-row>
+        <!-- 坐位列表外部容器 -->
+        <div class="desk_box"
+             :style="'margin-left: ' + seat_layout._box.margin_left + 'px; margin-top: ' + seat_layout._box.margin_top + 'px; width: ' + seat_layout._box.width + 'px; height: ' + seat_layout._box.height + 'px'">
+            <!-- 坐位列表内部容器 -->
+            <div class="seats_box"
+                 :style="'width: ' + seat_layout._container.width + 'px; height: ' + seat_layout._container.height + 'px; margin-left: ' + seat_layout._container.margin_left + 'px;'"
+                 @mousedown.right.stop="box_select_start" @mousemove.stop="box_select_size"
+                 @mouseup.right.stop="box_select_end"
+                 @selectstart.prevent @contextmenu.prevent>
+                <!-- 课桌包括边框 -->
+                <div class="desk_item"
+                     :style="'width: ' + seat_layout._desk.width + 'px; height: ' + seat_layout._desk.height + 'px; margin-top: 1px; margin-left: 1px; border-left: ' + (1==desk.draw_left?('1px solid ' + desk.border_color):'none') + '; border-top: ' + (1==desk.draw_top?('1px solid ' + desk.border_color):'none') + '; border-right: ' + (1==desk.draw_right?('1px solid ' + desk.border_color):'none') + '; border-bottom: ' + (1==desk.draw_bottom?('1px solid ' + desk.border_color):'none') + ';'"
+                     v-for="(desk, di) in seat_editor.room_seat">
+                    <!-- 课桌 -->
+                    <div class="desk_item_layout"
+                         :style="'width: ' + seat_layout._desk.clean_width + 'px; height: ' + seat_layout._desk.clean_height + 'px; margin-left: ' + seat_layout._desk.padding_left + 'px; margin-top: ' + seat_layout._desk.padding_top + 'px;'">
+                        <!-- 遍历坐位 -->
+                        <div class="desk_item_seat"
+                             :style="'width: ' + seat_layout._seat.width + 'px; height: ' + seat_layout._seat.height + 'px; margin-left: ' + (0==si?0:seat_layout._split.width) + 'px;'"
+                             :data-di="di" :data-si="si"
+                             v-for="(seat, si) in desk.seats">
+                            <!-- 课桌 -->
+                            <div class="desk_item_seat_box">
+                                <!-- 坐位标签 复选框 -->
+                                <div :class="'desk_item_seat_item_tag_checkbox seat_item_tag_' + (si % seat_editor.desk_seats)"
+                                     :style="'height: ' + seat_layout._tag.line_height + 'px; margin-top: ' + seat_layout._tag.margin_top + 'px;'">
+                                    <!-- 坐位标签 -->
+                                    <el-tooltip :content="seat.ip" placement="bottom">
+                                        <div class="desk_item_seat_item_tag"
+                                             :style="'width: ' + seat_layout._tag.width + 'px; height: ' + seat_layout._tag.height + 'px; line-height: ' + seat_layout._tag.height + 'px; border-radius: ' + seat_layout._tag.radius + 'px; margin-left: ' + seat_layout._tag.margin_left + 'px; margin-right: ' + (si==seat_editor.desk_seats-1?seat_layout._tag.margin_left:0) + 'px; background-color: ' + (1==seat.id_state?seat_layout._tag.enable:seat_layout._tag.disabled) + ';'"
+                                             :data-di="di" :data-si="si" @click="toggle_seat_state">
+                                            {{seat.order + 1}}
+                                        </div>
+                                    </el-tooltip>
+                                    <!-- 坐位复选框 -->
+                                    <input type="checkbox"
+                                           :style="'width: ' + seat_layout._checkbox.width + 'px; height: ' + seat_layout._checkbox.height + 'px; margin-left: ' + seat_layout._checkbox.margin_horizontal + 'px; margin-top: ' + seat_layout._checkbox.margin_top + 'px;'"
+                                           v-model="seat_editor.room_seat[di].seats[si].checkbox"
+                                           v-if="seat_editor.room_seat[di].seats[si].showcheckbox"/>
+                                </div>
+                                <!-- 姓名 -->
+                                <div :class="'desk_item_seat_item_tag_checkbox desk_item_seat_item_name_' + (si % seat_editor.desk_seats)"
+                                     :style="'margin-top: ' + seat_layout._name.margin_top + 'px;'">
+                                    <div :style="'width: ' + seat_layout._name.margin_left + 'px; height: ' + seat_layout._name.height + 'px'"></div>
+                                    <div class="desk_item_seat_item_name"
+                                         :style="'width: ' + seat_layout._name.width + 'px;'" data-type="1"
+                                         :data-desk="di" :data-seat="si" data-student="0"
+                                         @dragstart.stop="seat_drop_start" @drop.stop="seat_drop_end"
+                                         @dragover.stop="seat_drop" draggable="true">
+                                        <el-tooltip :content="seat.title" placement="bottom">
+                                            <div class="desk_item_seat_student_name"
+                                                 :style="'padding: 2px 5px 2px 5px; width: ' + (seat_layout._name.width-13) + 'px'">
+                                                {{ seat.caption }}
+                                            </div>
+                                        </el-tooltip>
+                                    </div>
+                                </div>
+                                <!-- 学号 -->
+                                <!--
+                                <div :class="'desk_item_seat_item_tag_checkbox desk_item_seat_item_sno_' + (si % seat_editor.desk_seats)"
+                                     :style="'margin-top: ' + seat_layout._sno.margin_top + 'px;'">
+                                    <div :style="'width: ' + seat_layout._sno.margin_left + 'px; height: ' + seat_layout._sno.height + 'px'"></div>
+                                    <div class="desk_item_seat_item_sno"
+                                         :style="'height: ' + seat_layout._sno.height + 'px; line-height: ' + seat_layout._sno.height + 'px;'">
+
+                                    </div>
+                                </div>
+                                -->
+                            </div>
+                            <!-- 椅子 -->
+                            <div class="desk_item_seat_item_chair"
+                                 :style="'margin-top: ' + seat_layout._chair.margin_top + 'px'">
+                                <el-tooltip :content="'选择/取消--' + seat.ip" placement="right" :visible="false">
+                                    <div class="desk_item_seat_chair"
+                                         :style="'width: ' + seat_layout._chair.width + 'px; height: ' + seat_layout._chair.height + 'px; border-radius: ' + seat_layout._chair.radius + 'px;'"
+                                         :data-di="di" :data-si="si" @click="toggle_seat_select">
+
+                                    </div>
+                                </el-tooltip>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 第三、第四个学生 -->
+                    <div class="desk_item_more_student_box"
+                         :style="'width: ' + seat_layout._excess.width + 'px; height: ' + seat_layout._excess.height + 'px; left: ' + seat_layout._excess.left + 'px; top: ' + seat_layout._excess.top + 'px;'"
+                         v-if="desk.excess && desk.excess.length>0">
+                        <div class="desk_item_more_student">
+                            <div class="desk_item_more_student_item" data-type="3" :data-desk="di" data-seat="0"
+                                 :data-student="ei" @dragstart.stop="seat_drop_start" @drop.stop="seat_drop_end"
+                                 @dragover.stop="seat_drop" draggable="true" v-for="(exces, ei) in desk.excess">
+                                <el-tooltip :content="exces.sno" placement="bottom" :visible="false">
+                                    <div>{{exces.name}}</div>
+                                </el-tooltip>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 组标题 -->
+                    <div class="desk_item_title" v-if="0==desk.order"
+                         :style="'left: ' + (seat_layout._tag.margin_left*2 + seat_layout._tag.width) + 'px; top: ' + seat_layout._tag.margin_top + 'px; height: ' + seat_layout._tag.height + 'px; line-height: ' + seat_layout._tag.height + 'px; width: ' + (seat_layout._desk.width - seat_layout._tag.margin_left*4 - seat_layout._tag.width*2) + 'px;'">
+                        {{ seat_editor.student_groups.find(g => g.id == desk.id_group).title }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 多余学生框 -->
+        <div class="excess_box"
+             :style="'left: ' + seat_layout._excess_box.left + 'px; top: ' + seat_layout._excess_box.top + 'px; width: ' + seat_layout._excess_box.width + 'px'"
+             v-if="seat_editor.excess_student.length>0">
+            <div class="excess_box_title"
+                 :style="'height: ' + seat_layout._excess_box.title_height + 'px; line-height: ' + seat_layout._excess_box.title_height + 'px'">
+                剩余学生
+            </div>
+            <div class="excess_item_box">
+                <div class="desk_item_seat_student_name excess_item_name"
+                     :style="'margin-top: ' + seat_layout._name.margin_top + 'px; margin-left: ' + seat_layout._name.margin_left + 'px; width: ' + seat_layout._name.width + 'px; height: ' + seat_layout._name.height + 'px; line-height: ' + seat_layout._name.height + 'px; padding: 2px 5px 2px 5px;'"
+                     v-for="(student, ti) in seat_editor.excess_student" data-type="2" data-desk="0" data-seat="0"
+                     :data-student="ti"
+                     @dragstart.stop="seat_drop_start" @drop.stop="seat_drop_end" @dragover.stop="seat_drop"
+                     draggable="true">
+                    <el-tooltip :content="student.sno" placement="bottom">
+                        <div>
+                            {{ student.name }}
+                        </div>
+                    </el-tooltip>
+                </div>
+            </div>
+        </div>
+    </el-dialog>
+</div>
+<!-- 导入app脚本 -->
+<script type="text/javascript" src="/assets/js/app.js"></script>
+<!-- 导入qs脚本 -->
+<script type="text/javascript" src="/assets/js/axios/qs.js"></script>
+<!-- 导入axios脚本 -->
+<script type="text/javascript" src="/assets/js/axios/axios.js"></script>
+<!-- 导入工具脚本 -->
+<script type="text/javascript" src="/utils/util.js"></script>
+<!-- 导入业务脚本 -->
+<script type="text/javascript" src="/utils/business.js"></script>
+<!-- 导入api脚本 -->
+<script type="text/javascript" src="/utils/api.js"></script>
+<!-- 导入组织机构组件脚本 -->
+<script type="text/javascript" src="/component/organization.js"></script>
+<!-- 导入坐位组件脚本 -->
+<script type="text/javascript" src="/component/seat.js"></script>
+<!-- 导入本页脚本 -->
+<script type="text/javascript" src="/room/teacher_list.js"></script>
+</body>
+</html>

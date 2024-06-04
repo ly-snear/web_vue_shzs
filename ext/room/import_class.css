@@ -1,0 +1,45 @@
+html body {
+    margin: 0px;
+    padding: 0px;
+}
+
+.select_excel_box {
+    margin-top: calc(50vh - 20px);
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    width: 100vw;
+    height: 35px;
+}
+
+.select_excel_button {
+    padding-left: 5px;
+    padding-right: 5px;
+    height: 35px;
+    line-height: 35px;
+    vertical-align: middle;
+    display: flex;
+    flex-direction: row;
+    border-right: 5px;
+    background-color: #0b56ca;
+    color: #ffffff;
+}
+
+.select_excel_button:hover {
+    cursor: pointer;
+    color: #dddddd;
+}
+
+.select_excel_button_icon {
+    width: 32px;
+    height: 32px;
+    font-size: 32px;
+    margin-top: 2px;
+}
+
+.select_excel_button_text{
+    margin-left: 5px;
+    font-size: 18px;
+    font-weight: bold;
+}

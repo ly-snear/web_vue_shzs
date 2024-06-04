@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="../assets/js/axios/axios.js"></script>
+    <title>测试Minio STS</title>
+</head>
+<body>
+<button class="" onclick="select_room_head()">上传</button>
+<br/>
+<img id="head_img" src="" style="width: 300px;height: 300px">
+<script>
+    function select_room_head() {
+        const room_head_select = document.createElement("input");
+        room_head_select.id = "select_head_images";
+        room_head_select.setAttribute('type', 'file');
+        room_head_select.setAttribute('accept', 'image/*');
+        room_head_select.style.setProperty('display', 'none', 'important');
+        document.body.appendChild(room_head_select);
+        room_head_select.onchange = function (e) {
+            let file = e.target.files[0];
+            let put_url = 'https://oss.nnyun.net:9000/shuhua/20230703666688.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=2g6CbLw4jR274Phy8t2q%2F20230703%2Fbeijing-01%2Fs3%2Faws4_request&X-Amz-Date=20230703T093029Z&X-Amz-Expires=86400&X-Amz-SignedHeaders=host&response-content-type=application%2Fjson&X-Amz-Signature=b04d6276814a9d77714e2174e375ed7aa9b5b60add219e75434e1195bf04a0aa';
+            let method = 'put';
+            //let header = {'content-type': 'multipart/form-data'};
+            let config = {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            }
+            axios.put(put_url, file, config).then(res=>{
+                console.log(res);
+            }).catch(ex=>{
+                let msg = ex.response.data.status + ':' + ex.response.data.error + '-->' + ex.response.data.path;
+                console.log(msg);
+            });
+        }
+        room_head_select.click();
+    }
+</script>
+</body>
+</html>
