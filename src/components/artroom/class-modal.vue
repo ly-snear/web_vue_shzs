@@ -16,7 +16,13 @@ export default {
   },
   computed: {
     className() {
-      return this.classList.find((c) => c.id == this.classId)?.name;
+      //return this.classList.find((c) => c.id == this.classId)?.name;
+      //liuyang_update
+      if(this.classList.find((c) => c.id == this.classId) != null){
+        return this.classList.find((c) => c.id == this.classId).name;
+      }else{
+        return '';
+      }
     },
   },
   watch: {},

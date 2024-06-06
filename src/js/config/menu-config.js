@@ -213,7 +213,10 @@ const getMenus = function (menuIdList = []) {
 
 let getAuthMenu = (menus, menuIdList) => {
   let configMenu = [];
-  const level = JSON.parse(localStorage.getItem('user') || '{"level":0}')?.level;
+  //const level = JSON.parse(localStorage.getItem('user') || '{"level":0}')?.level;
+  //liuyang_update
+  const level = JSON.parse(localStorage.getItem('user') || '{"level":0}').level;
+
   //console.log('l-->',level);
   for (let menu of menus) {
     let m = Utils.copy(menu);

@@ -370,6 +370,7 @@ export function filterSize(size) {
 
 export function getApiURL() {
   // let url = 'http://43.143.240.186:8989/api';
-  let url = 'http://127.0.0.1:8989/api';
+  // let url = 'http://127.0.0.1:8989/api';
+  let url = 'http://shuhua.nnyun.net/api';
   return url;
 }

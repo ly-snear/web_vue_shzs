@@ -134,19 +134,29 @@ export default {
       let graduateName = '';
       let periodName = '';
       if (this.query.idClass != undefined) {
-        const idName = this.classCodes.find((c) => c.key == this.query.idClass)?.title;
-        className = idName + '班';
+        //idName = this.classCodes.find((c) => c.key == this.query.idClass)?title;
+        //className = idName + '班';
+        //liuyang_update
+        const idName = '';
+        if(this.classCodes.find((c) => c.key == this.query.idClass)!=null){
+          idName = this.classCodes.find((c) => c.key == this.query.idClass).title;
+          className = idName + '班';
+        }
       }
       if (this.query.class) {
         className = this.query.class;
       }
       if (this.query.graduationYear) {
-        graduateName =
-          this.graduationYears.find((c) => c.key == this.query.graduationYear)?.title +
-          '级';
+        //liuyang_update
+        if(this.graduationYears.find((c) => c.key == this.query.graduationYear)!=null){
+          graduateName = this.graduationYears.find((c) => c.key == this.query.graduationYear).title + '级';
+        }
       }
       if (this.query.period) {
-        periodName = this.periods.find((c) => c.key == this.query.period)?.title;
+        //liuyang_update
+        if(this.periods.find((c) => c.key == this.query.period)!=null){
+          periodName = this.periods.find((c) => c.key == this.query.period).title;
+        }
       }
       return `${periodName}${graduateName}${className}`;
     }

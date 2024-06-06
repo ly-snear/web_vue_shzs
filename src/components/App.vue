@@ -12,7 +12,7 @@ export default {
   },
   store,
   created() {
-    if (this.$store.getters["user"]?.token) this.getOrg();
+    if (this.$store.getters["user"].token) this.getOrg();
   },
   mounted(){
   },

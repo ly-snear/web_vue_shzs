@@ -475,10 +475,21 @@ export default {
       }
     },
     getGroupName(groupId) {
-      return this.groups.find((g) => g.key == groupId)?.title || "";
+      //liuyang_update
+      if(this.groups.find((g) => g.key == groupId)!=null){
+        return this.groups.find((g) => g.key == groupId).title;
+      }else{
+        return '';
+      }
     },
     getCameraName(data) {
-      return (data.cameras || []).find((c) => c.id == data.idCamera)?.name || "";
+      //liuyang_update
+      if((data.cameras || []).find((c) => c.id == data.idCamera)!=null){
+        return (data.cameras || []).find((c) => c.id == data.idCamera).name;
+      }
+      else{
+        return '';
+      }
     },
   },
 };
