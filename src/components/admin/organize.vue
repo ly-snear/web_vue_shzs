@@ -7,6 +7,9 @@
         <div class='h-panel-body'>
           <Row type='flex' :space='20'>
             <Cell :width='4'>
+              <Select v-model='province.now' :datas='province.selects' @change='changeProvince' placeholder='选择省份'></Select>
+            </Cell>
+            <Cell :width='4'>
               <Select v-model='city.now' :datas='city.selects' @change='changeCity' placeholder='选择城市'></Select>
             </Cell>
             <Cell :width='4'>
@@ -22,6 +25,7 @@
         <div class='h-panel-body'>
           <Table :datas='table.datas'>
             <TableItem title='序号' prop='$serial' :width='140'></TableItem>
+            <TableItem title='省份' prop='province'></TableItem>
             <TableItem title='城市' prop='city'></TableItem>
             <TableItem title='区县' prop='zone'></TableItem>
             <TableItem title='学校' prop='school'></TableItem>
@@ -48,27 +52,44 @@
         <div class='title'>创建地区</div>
         <Form ref='form' labelPosition='left'>
           <FormItem label='类型'>
-            <Radio v-model='radio' :datas='radios'></Radio>
+            <Radio v-model='radio' :datas='radios' @change="change_clear_input"></Radio>
           </FormItem>
-          <FormItem label='城市' v-if='radio == 0'>
-            <input type='text' v-model='form.name' placeholder='请输入城市名' />
+
+          <FormItem label='省份' v-if='radio == 0'>
+            <Select v-model='form.province.now' :datas='form.province.selects' placeholder='选择省份'></Select>
+          </FormItem>
+
+          <FormItem label='省份' v-if='radio == 1'>
+            <Select v-model='form.province_original.now' :datas='form.province_original.selects' placeholder='选择省份'></Select>
           </FormItem>
           <FormItem label='城市' v-if='radio == 1'>
-            <Select v-model='form.city.now' :datas='form.city.selects' placeholder='选择城市'></Select>
+            <input type='text' v-model='form.name' placeholder='请输入城市名' />
           </FormItem>
-          <FormItem label='区县' v-if='radio == 1'>
-            <input type='text' v-model='form.name' placeholder='请输入区县名' />
+
+          <FormItem label='省份' v-if='radio == 2'>
+            <Select v-model='form.province_original.now' :datas='form.province_original.selects' @change='changeOpenProvince' placeholder='选择省份'></Select>
           </FormItem>
           <FormItem label='城市' v-if='radio == 2'>
+            <Select v-model='form.city.now' :datas='form.city.selects' placeholder='选择城市'></Select>
+          </FormItem>
+          <FormItem label='区县' v-if='radio == 2'>
+            <input type='text' v-model='form.name' placeholder='请输入区县名' />
+          </FormItem>
+
+          <FormItem label='省份' v-if='radio == 3'>
+            <Select v-model='form.province_original.now' :datas='form.province_original.selects' @change='changeOpenProvince' placeholder='选择省份'></Select>
+          </FormItem>
+          <FormItem label='城市' v-if='radio == 3'>
             <Select v-model='form.city.now' :datas='form.city.selects' @change='changeOpenCity'
                     placeholder='选择城市'></Select>
           </FormItem>
-          <FormItem label='区县' v-if='radio == 2'>
+          <FormItem label='区县' v-if='radio == 3'>
             <Select v-model='form.zone.now' :datas='form.zone.selects' placeholder='选择区县'></Select>
           </FormItem>
-          <FormItem label='学校' v-if='radio == 2'>
+          <FormItem label='学校' v-if='radio == 3'>
             <input type='text' v-model='form.name' placeholder='请输入学校名' />
           </FormItem>
+
           <FormItem>
             <Button color='primary' circle @click='save' :loading='loading'>保 存</Button>
             <Button circle @click='opened = false'>取 消</Button>
@@ -85,6 +106,10 @@ import { executeResult, isInteger } from '../../js/common/utils';
 export default {
   data() {
     return {
+      province: {
+        selects: [],
+        now: 0
+      },
       city: {
         selects: [],
         now: 0
@@ -105,11 +130,16 @@ export default {
       loading: false,
       radio: 0,
       radios: [
-        { title: '市级', key: 0 },
-        { title: '区县', key: 1 },
-        { title: '学校', key: 2 }
+        { title: '省份', key: 0 },
+        { title: '市级', key: 1 },
+        { title: '区县', key: 2 },
+        { title: '学校', key: 3 }
       ],
       form: {
+        province: {
+          selects: [],
+          now: 0
+        },
         city: {
           selects: [],
           now: 0
@@ -130,10 +160,27 @@ export default {
       this.disabled = true;
     }
 
+    // 初始化绑定省份
     if (user.level == 10000) {
+      console.log('----getProvince()-----')
+      this.province = this.init_province_original();
+    }
+
+    if (user.level == 10000) {
+      console.log('----getCity()-----')
+      console.log(Utils.getCity());
       this.city = Utils.getCity();
     }
+
     if (user.level == 1200) {
+      this.province = {
+        selects: [{
+          title: Utils.getName(user.idProvince),
+          key: user.idProvince
+        }],
+        now: user.idProvince
+      };
+
       this.city = {
         selects: [{
           title: Utils.getName(user.idCity),
@@ -141,9 +188,19 @@ export default {
         }],
         now: user.idCity
       };
+
       this.zone = Utils.getZone(this.city.now);
     }
+
     if (user.level == 1100) {
+      this.province = {
+        selects: [{
+          title: Utils.getName(user.idProvince),
+          key: user.idProvince
+        }],
+        now: user.idProvince
+      };
+
       this.city = {
         selects: [{
           title: Utils.getName(user.idCity),
@@ -151,6 +208,7 @@ export default {
         }],
         now: user.idCity
       };
+
       this.zone = {
         selects: [{
           title: Utils.getName(user.idZone),
@@ -165,33 +223,78 @@ export default {
   mounted() {
   },
   methods: {
+    //选项改变时清空文本框
+    change_clear_input(data) {
+      this.form.name = "";
+    },
+    init_province_original(){
+      let now = 0;
+      let selects = [];
+      Ajax.get('/user/organize/province', {}).then(resp => {
+        if (resp.ok) {
+          resp.body.forEach(e => {
+            selects.push({
+              title: e.text,
+              key: e.id
+            });
+          });
+        }
+      });
+      return {selects,now};
+    },
+    init_province_regular(){
+      let now = 0;
+      let selects = [];
+      Ajax.get('/organize/province/list', {}).then(resp => {
+        if (resp.ok) {
+          resp.body.forEach(e => {
+            selects.push({
+              title: e.name,
+              key: e.id
+            });
+          });
+        }
+      });
+      return {selects,now};
+    },
     init() {
       Ajax.get('/organize/list', {
         id: this.zone.now || this.city.now
       }).then(resp => {
         if (resp.ok) {
+          console.log(resp.body)
           this.setTable(resp.body);
         }
       });
     },
+    changeProvince() {
+      console.log('-----------------changeProvince()-------------------')
+      this.city = Utils.getCity(this.province.now);
+      this.init();
+    },
     changeCity() {
+      console.log('-----------------changeCity()-------------------')
       this.zone = Utils.getZone(this.city.now);
       this.init();
     },
     changeZone() {
+      console.log('-----------------changeZone()-------------------')
       this.init();
     },
     setTable(body) {
+      console.log('-----------------0.0004-------------------')
       let idx = this.table.pagination.page - 1;
       let list = body.slice(idx * 10, (idx + 1) * 10);
-
+      console.log(list)
       list.forEach(e => {
+        e.province = Utils.getName(e.idProvince)==null ? '' : Utils.getName(e.idProvince);
         e.city = Utils.getName(e.idCity);
         e.zone = Utils.getName(e.idZone);
         e.school = Utils.getName(e.idSchool);
       });
       this.table.datas = list;
       this.table.pagination.total = body.length;
+      console.log('-----------------0.0004-------------------')
     },
     remove(data) {
       Utils.confirm(this, '确定删除该记录 ？', modal => {
@@ -251,22 +354,24 @@ export default {
       }
     },
     open() {
+      console.log('-----------------0.0005-------------------')
       this.opened = true;
       // let user = G.get('user');
       let user = this.$store.getters['user'];
       if (user.level == 10000) {
         this.radio = 0;
-
+        this.form.province = this.init_province_regular();
+        this.form.province_original = this.init_province_original();
         this.form.city = Utils.getCity();
         this.form.zone = { selects: [], now: 0 };
       }
-      if (user.level == 1200) {
-        this.radios = [
-          { title: '区县', key: 1 },
-          { title: '学校', key: 2 }
-        ];
-        this.radio = 1;
 
+      if (user.level == 1200) {
+        this.radio = 2;
+        this.radios = [
+          { title: '区县', key: 2 },
+          { title: '学校', key: 3 }
+        ];
         this.form.city = {
           selects: [{
             title: Utils.getName(user.idCity),
@@ -276,12 +381,12 @@ export default {
         };
         this.form.zone = Utils.getZone(this.city.now);
       }
-      if (user.level == 1100) {
-        this.radios = [
-          { title: '学校', key: 2 }
-        ];
-        this.radio = 2;
 
+      if (user.level == 1100) {
+        this.radio = 3;
+        this.radios = [
+          { title: '学校', key: 3 }
+        ];
         this.form.city = {
           selects: [{
             title: Utils.getName(user.idCity),
@@ -298,7 +403,12 @@ export default {
         };
       }
     },
+    changeOpenProvince() {
+      console.log('-----------------0.0006-------------------')
+      this.form.city = Utils.getCity(this.form.province_original.now);
+    },
     changeOpenCity() {
+      console.log('-----------------0.0007-------------------')
       this.form.zone = Utils.getZone(this.form.city.now);
     },
     updateOrganize() {

@@ -30,8 +30,7 @@ module.exports = {
         // 此处应该配置为开发服务器的后台地址
         '/api': {
           // target: 'http://222.128.31.237:8899',
-          // target: 'http://shuhua.nnyun.net',
-          target: 'http://192.168.110.41',
+          target: 'http://shuhua.nnyun.net',
           changeOrigin: true
         }
       },

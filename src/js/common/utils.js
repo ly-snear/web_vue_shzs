@@ -1,5 +1,6 @@
 import utils from 'hey-utils';
 import store from 'js/vuex/store';
+import Vue from 'vue';
 
 const rclass = /[\t\r\n\f]/g;
 
@@ -100,13 +101,13 @@ export default utils.extend({}, utils, {
     openWindow(url, { target });
     return true;
   },
-  getCity() {
+  getCity(idProvince) {
     let now = 0;
     let selects = [];
     // let list = G.get('organizes');
     let list = store.getters['organizes'];
     list.forEach(e => {
-      if (e.level == 1200) {
+      if (e.level == 1200 && e.idProvince == idProvince) {
         selects.push({
           title: e.name,
           key: e.id
@@ -371,6 +372,6 @@ export function filterSize(size) {
 export function getApiURL() {
   // let url = 'http://43.143.240.186:8989/api';
   // let url = 'http://127.0.0.1:8989/api';
-  let url = 'http://shuhua.nnyun.net/api';
+  let url = 'http://192.168.110.127/api';
   return url;
 }
