@@ -72,6 +72,24 @@ const fullMenus = [
     level: (role) => role == 10000 || role == 100
   },
   {
+    title: '班级管理',
+    key: 'AdminClass',
+    icon: 'h-icon-home',
+    level: (role) => role == 10000
+  },
+  {
+    title: '项目管理',
+    key: 'AdminProject',
+    icon: 'h-icon-home',
+    level: (role) => role == 10000
+  },
+  {
+    title: '备课管理',
+    key: 'AdminLesson-Preparation',
+    icon: 'h-icon-home',
+    level: (role) => role == 10000
+  },
+  {
     title: '人员管理',
     key: 'TabUser',
     icon: 'h-icon-user',

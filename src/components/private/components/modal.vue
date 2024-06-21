@@ -56,7 +56,7 @@ export default {
       if (this.select3.val) {
         console.log('准备存储末级KEY');
         localStorage.setItem('ps3', this.select3.val);
-        console.log('完成存储末级KEY');
+        //console.log('完成存储末级KEY');
       }
       this.loading = true;
       try {

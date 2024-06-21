@@ -38,7 +38,7 @@ let ajax = {
     return this.ajax(params, extendParam);
   },
   post: function (url, param, extendParam) {
-    // console.log('post-->', url);
+    console.log('post-->', url);
     var params = {
       url,
       method: 'POST'

@@ -131,13 +131,44 @@ export default utils.extend({}, utils, {
     });
     return { selects, now };
   },
+  //学校
   getSchool(idZone) {
     let now = 0;
     let selects = [];
-    // let list = G.get('organizes');
     let list = store.getters['organizes'];
     list.forEach(e => {
       if (e.level == 1000 && e.idZone == idZone) {
+        selects.push({
+          title: e.name,
+          key: e.id
+        });
+      }
+    });
+    return { selects, now };
+  },
+  //学段
+  getStage(idSchool) {
+    let now = 0;
+    let selects = [];
+    let list = store.getters['organizes'];
+    list.forEach(e => {
+      if (e.level == 1000 && e.idSchool == idSchool) {
+        selects.push({
+          title: e.name,
+          key: e.id
+        });
+      }
+    });
+    return { selects, now };
+  },
+  //年级
+  getGrade(idGrade) {
+    let now = 0;
+    let selects = [];
+    let list = store.getters['organizes'];
+    console.log(list)
+    list.forEach(e => {
+      if (e.level == 1000 && e.idGrade == idGrade) {
         selects.push({
           title: e.name,
           key: e.id

@@ -162,13 +162,10 @@ export default {
 
     // 初始化绑定省份
     if (user.level == 10000) {
-      console.log('----getProvince()-----')
       this.province = this.init_province_original();
     }
 
     if (user.level == 10000) {
-      console.log('----getCity()-----')
-      console.log(Utils.getCity());
       this.city = Utils.getCity();
     }
 
@@ -258,34 +255,39 @@ export default {
       return {selects,now};
     },
     init() {
-      Ajax.get('/organize/list', {
-        id: this.zone.now || this.city.now
-      }).then(resp => {
+      let url = '/pcd/organize/list/v2';
+      let param = {
+        province: this.province.now>0?this.province.now:0,
+        city: this.zone.now>0?this.zone.now:0,
+        zone:this.city.now>0?this.city.now:0
+      };
+      this.loading = true;
+      Ajax.postJson(url, param).then((resp) => {
+        this.loading = false;
         if (resp.ok) {
           console.log(resp.body)
           this.setTable(resp.body);
+        } else {
+
         }
+      }).catch(ex => {
+        console.log(ex);
       });
     },
     changeProvince() {
-      console.log('-----------------changeProvince()-------------------')
       this.city = Utils.getCity(this.province.now);
       this.init();
     },
     changeCity() {
-      console.log('-----------------changeCity()-------------------')
       this.zone = Utils.getZone(this.city.now);
       this.init();
     },
     changeZone() {
-      console.log('-----------------changeZone()-------------------')
       this.init();
     },
     setTable(body) {
-      console.log('-----------------0.0004-------------------')
       let idx = this.table.pagination.page - 1;
       let list = body.slice(idx * 10, (idx + 1) * 10);
-      console.log(list)
       list.forEach(e => {
         e.province = Utils.getName(e.idProvince)==null ? '' : Utils.getName(e.idProvince);
         e.city = Utils.getName(e.idCity);
@@ -294,7 +296,6 @@ export default {
       });
       this.table.datas = list;
       this.table.pagination.total = body.length;
-      console.log('-----------------0.0004-------------------')
     },
     remove(data) {
       Utils.confirm(this, '确定删除该记录 ？', modal => {
@@ -314,18 +315,32 @@ export default {
     save() {
       this.loading = true;
       if (this.radio == 0) {
-        Ajax.post('/organize/create/city', {
-          name: this.form.name
+        Ajax.post('/organize/create/province', {
+          name: (this.form.province.selects.find(o=>o.key == this.form.province.now)).title
         }).then(resp => {
           this.loading = false;
           this.opened = false;
           if (resp.ok) {
-            HeyUI.$Message.success('保存成功');
+            HeyUI.$Message.success('省份保存成功');
             this.updateOrganize();
             this.init();
           }
         });
-      } else if (this.radio == 1) {
+      }
+      else if (this.radio == 1) {
+        Ajax.post('/organize/create/city', {
+          name: this.form.name,
+          idProvince:this.form.province_original.now
+        }).then(resp => {
+          this.loading = false;
+          this.opened = false;
+          if (resp.ok) {
+            HeyUI.$Message.success('城市保存成功');
+            this.updateOrganize();
+            this.init();
+          }
+        });
+      } else if (this.radio == 2) {
         Ajax.post('/organize/create/zone', {
           name: this.form.name,
           idCity: this.form.city.now
@@ -333,7 +348,7 @@ export default {
           this.loading = false;
           this.opened = false;
           if (resp.ok) {
-            HeyUI.$Message.success('保存成功');
+            HeyUI.$Message.success('区县保存成功');
             this.updateOrganize();
             this.init();
           }
@@ -346,7 +361,7 @@ export default {
           this.loading = false;
           this.opened = false;
           if (resp.ok) {
-            HeyUI.$Message.success('保存成功');
+            HeyUI.$Message.success('学校保存成功');
             this.updateOrganize();
             this.init();
           }

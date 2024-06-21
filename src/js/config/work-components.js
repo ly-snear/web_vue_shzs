@@ -78,6 +78,24 @@ export default [
     meta: { title: '学生管理', icon: 'icon-users' }
   },
   {
+    path: '/admin/class',
+    name: 'AdminClass',
+    component: (resolve) => require(['components/admin/class'], resolve),
+    meta: { title: '班级管理', icon: 'icon-users' }
+  },
+  {
+    path: '/admin/project',
+    name: 'AdminProject',
+    component: (resolve) => require(['components/admin/project'], resolve),
+    meta: { title: '项目管理', icon: 'icon-users' }
+  },
+  {
+    path: '/admin/lesson-preparation',
+    name: 'AdminLesson-Preparation',
+    component: (resolve) => require(['components/admin/lesson-preparation'], resolve),
+    meta: { title: '备课管理', icon: 'icon-users' }
+  },
+  {
     path: '/lesson/group',
     name: 'LessonGroup',
     component: (resolve) => require(['components/lesson/group'], resolve),

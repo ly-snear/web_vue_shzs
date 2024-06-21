@@ -335,14 +335,18 @@ export default {
       this.init();
     },
     upload(file) {
-      Ajax.post('/resource/create', {
+      let parma = {
         name: file.name,
         url: file.url,
         idUp: Utils.last(this.bread).id,
         folder: false,
         shared: false,
         domain: 0
-      }).then((resp) => {
+      };
+      console.log(111111111111111111111)
+      console.log(parma)
+      Ajax.post('/resource/create', parma).then((resp) => {
+        console.log(resp)
         if (resp.ok) {
           HeyUI.$Message.success('创建成功');
           this.init();
@@ -398,14 +402,14 @@ export default {
       if (this.select2.val) {
         // console.log('准备存储末级KEY');
         localStorage.setItem('ps3', this.select2.val);
-        console.log('完成存储末级KEY-->', this.select2.val, 'domain', this.domain);
+        //console.log('完成存储末级KEY-->', this.select2.val, 'domain', this.domain);
       }
       Ajax.get('/resource/tree/shared', {
         domain: this.domain
       }).then((resp) => {
         if (resp.ok) {
           this.d2.option.datas = resp.body;
-          console.log('结果：', this.d2.option.datas);
+          //console.log('结果：', this.d2.option.datas);
           this.d2.bread = [
             {
               title: '根目录',
