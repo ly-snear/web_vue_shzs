@@ -90,6 +90,12 @@ export default [
     meta: { title: '项目管理', icon: 'icon-users' }
   },
   {
+    path: '/admin/template',
+    name: 'AdminTemplate',
+    component: (resolve) => require(['components/admin/template'], resolve),
+    meta: { title: '模板管理', icon: 'icon-users' }
+  },
+  {
     path: '/admin/lesson-preparation',
     name: 'AdminLesson-Preparation',
     component: (resolve) => require(['components/admin/lesson-preparation'], resolve),

@@ -47,6 +47,9 @@ export default {
   },
   methods: {
     init() {
+      console.log(this.$el);
+      console.log(theme);
+      console.log(this.initOption);
       let chart = this.chart = echarts.init(this.$el, theme, this.initOption);
       this.chart.setOption(this.options);
 

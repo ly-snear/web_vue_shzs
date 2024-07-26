@@ -53,6 +53,13 @@ let ajax = {
       data: paramJson
     }, extendParam);
   },
+  postJson_formdata: function (url, paramJson, extendParam) {
+    return this.ajax_formdata({
+      url,
+      method: 'POST',
+      data: paramJson
+    }, extendParam);
+  },
   patchJson: function (url, paramJson, dataType, extendParam) {
     return this.ajax({
       url,
@@ -67,6 +74,7 @@ let ajax = {
     }, extendParam);
   },
   ajax: function (param, extendParam) {
+    console
     // console.log('q-->', param);
     let params = Utils.extend({}, DefaultParam, param, extendParam || {});
     params.crossDomain = params.url.indexOf('http') === 0;
@@ -100,6 +108,97 @@ let ajax = {
         return qs.stringify(params, { allowDots: true });
       }
     };
+    if (params.crossDomain) {
+      defaultParam.headers = {};
+    }
+    let that = this;
+    params = Utils.extend({}, defaultParam, params);
+    let message = '';
+    return new Promise((resolve) => {
+      return axios.request(params).then((response) => {
+        that.deleteRequest(params.url);
+        // console.log('r-->', response);
+        let data = response.data;
+        let status = response.status;
+        message = data.msg;
+        // 如果后端统一封装返回，即所有的请求都是200, 错误码由返回结果提供，则使用以下代码获取状态
+        if (status != 200) {
+          switch (status) {
+            case 400:
+              HeyUI.$Message.error('请求不存在');
+              break;
+            case 401:
+              HeyUI.$Message.error('认证失败');
+              break;
+            case 500:
+              HeyUI.$Message.error('后台异常');
+              break;
+            default:
+              HeyUI.$Message.error('请求异常');
+              break;
+          }
+          resolve({ ok: false, msg: message });
+        } else {
+          // console.log(extendParam);
+          if (data.msg == 'token' && !data.ok && extendParam.auth != false) {
+            HeyUI.$Message.warn('用户认证失败');
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            store.dispatch('clearState').then(() => {
+              router.push('/login');
+            });
+            reject(data);
+            return;
+          }
+          if (data.msg && extendParam.auth != false) {
+            HeyUI.$Message.error(data.msg);
+          }
+          resolve(data);
+        }
+      }).catch((ex) => {
+        // console.log('ex---', ex);
+        that.deleteRequest(params.url);
+        resolve({ ok: false, msg: message });
+      });
+    });
+  },
+  ajax_formdata: function (param, extendParam) {
+    console.log(param);
+    // console.log('q-->', param);
+    let params = Utils.extend({}, DefaultParam, param, extendParam || {});
+    params.crossDomain = params.url.indexOf('http') === 0;
+    let url = params.url;
+    if (!params.crossDomain) {
+      url = params.url = this.PREFIX + params.url;
+    }
+    if (params.method != 'GET') {
+      if (this.isRequesting(url)) {
+        return new Promise((resolve, reject) => {
+          resolve({ ok: false, msg: '重复请求' });
+        });
+      }
+      if (params.repeatable === false) {
+        this.addRequest(url);
+      }
+    }
+    let header = {};
+    // let user = G.get('user');
+    let user = getInitUser();
+    if (user) {
+      header.token = user.token;
+      header.contentType='multipart/form-data';
+    }
+    let defaultParam = {
+      headers: header,
+      responseType: 'json',
+      validateStatus: function (status) {
+        return true;
+      },
+      paramsSerializer: (params) => {
+        return qs.stringify(params, { allowDots: true });
+      }
+    };
+    console.log(defaultParam)
     if (params.crossDomain) {
       defaultParam.headers = {};
     }

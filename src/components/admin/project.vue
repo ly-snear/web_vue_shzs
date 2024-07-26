@@ -5,9 +5,7 @@
 
       <div class='h-panel-bar scroll' style="height: 80px;">
         <div class='h-panel-right'>
-          <Button color='h-btn h-btn-blue' size='l' @click='addAndeditSwitch'>
-            新增一级项目
-          </Button>
+          <button class="h-btn" style="width: 95%;border: blue 0px solid;background-color: #3b91ff;color: #fff;" @click='addAndeditSwitch'><i class="h-icon-inbox"></i><span>新增一级项目</span></button>
         </div>
       </div>
 
@@ -16,6 +14,7 @@
           <p><Button class="h-btn h-btn-s h-btn-gray" @click="expandAll"><i class="h-icon-menu"></i></Button><Button class="h-btn h-btn-s h-btn-gray" @click="foldAll"><i class="h-icon-minus"></i></Button></p>
           <Table ref="table" :datas="table.datas">
             <TableItem title="序号" prop="$serial" :width='80' align="center"></TableItem>
+            <TableItem title="ID" :width='200' prop="id" treeOpener></TableItem>
             <TableItem title="项目标题" :width='200' prop="title" treeOpener></TableItem>
             <TableItem title="项目类型" :width='200' prop="type_title"></TableItem>
             <TableItem title='图标' :width='200' align="center">
@@ -92,7 +91,7 @@
           :rules='validationRules_sub'
         >
           <FormItem label='当前项目' >
-            {{project_title_sub}}
+            <p style="padding-top: 7px;background-color: #f1f1f1;border-radius: 3px;padding-left: 5px;padding-bottom: 3px;">{{project_title_sub}}</p>
           </FormItem>  
 
           <FormItem label='项目标题' prop='project_title'>
@@ -148,7 +147,7 @@ export default {
       table: {
         pagination: {
           page: 1,
-          size: 10,
+          size: 20,
           total: 0
         },
         datas: []
@@ -230,6 +229,7 @@ export default {
       let selects = [];
       Ajax.get('/prepare/project/type', {}).then(resp => {
         if (resp.ok) {
+          console.log(resp);
           resp.body.forEach(e => {
             selects.push({
               title: e.title,
@@ -260,7 +260,7 @@ export default {
     },
     setTable(body) {
       let idx = this.table.pagination.page - 1;
-      let list = body.slice(idx * 10, (idx + 1) * 10);
+      let list = body.slice(idx * 20, (idx + 1) * 20);
       list.forEach(e => {
 
       });

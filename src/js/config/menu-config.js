@@ -84,6 +84,12 @@ const fullMenus = [
     level: (role) => role == 10000
   },
   {
+    title: '模板管理',
+    key: 'AdminTemplate',
+    icon: 'h-icon-home',
+    level: (role) => role == 10000
+  },
+  {
     title: '备课管理',
     key: 'AdminLesson-Preparation',
     icon: 'h-icon-home',
