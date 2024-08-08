@@ -446,6 +446,8 @@ export default {
       let selects = [];
       Ajax.get('/user/school/teacher/list?idSchool='+ school_id, {}).then(resp => {
         if (resp.ok) {
+          console.log('班主任');
+          console.log(resp);
           resp.body.forEach(e => {
             selects.push({
               title: e.name,
@@ -518,7 +520,7 @@ export default {
       // 班主任（下拉单选）
       this.teacher = this.init_teacher_list(this.school.now);
       // 任课教师（多选）
-      this.teacherList  = this.init_teacher_list(this.school .now);
+      this.teacherList  = this.init_teacher_list(this.school.now);
       this.init();
     },
     //学段
@@ -629,6 +631,7 @@ export default {
     handleEdit(data) {
       console.log('编辑按钮')
       console.log(data.id)
+      console.log(data)
       this.editId = data.id;
       this.studentlist = [];
       for (let i = 0; i < this.students.length; i++) {

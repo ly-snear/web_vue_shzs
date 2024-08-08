@@ -19,6 +19,10 @@ const initRouter = () => {
         name: 'Login',
         component: (resolve) => require(['components/login/index'], resolve)
       }, {
+        path: '/login',
+        name: 'Authorization',
+        component: (resolve) => require(['components/login/authorization'], resolve)
+      }, {
         path: '/retrieve',
         name: 'retrieve',
         component: (resolve) => require(['components/user/retrieve'], resolve)
@@ -75,12 +79,23 @@ const initRouter = () => {
 
     // 判断地址栏中的token
     const routerLoginPage = () => {
-      if (to.name == 'Login') {
-        next();
-      } else {
-        next({ name: 'Login' });
+      if (to.name != 'AdminLesson-Preparation') {
+        if (to.name == 'Login') {
+          next();
+        } else {
+          next({ name: 'Login' });
+        }
       }
     };
+
+    const routerLoginPageAuthorization = () => {
+      if (to.name == 'AdminLesson-Preparation') {
+        next();
+      } else {
+        next({ name: 'AdminLesson-Preparation' });
+      }
+    };
+
     let paramToken = GetQueryString('token');
     if (paramToken) {
       try {
@@ -89,12 +104,19 @@ const initRouter = () => {
       } catch (error) {
         routerLoginPage();
       }
-
     } else {
-      if (!store.getters['token']) {
-        routerLoginPage();
-      } else {
-        next();
+      if(to.name == 'AdminLesson-Preparation'){
+        if (!store.getters['token']) {
+          routerLoginPageAuthorization();
+        } else {
+          next();
+        }
+      }else{
+        if (!store.getters['token']) {
+          routerLoginPage();
+        } else {
+          next();
+        }
       }
     }
 

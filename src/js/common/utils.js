@@ -403,6 +403,20 @@ export function filterSize(size) {
 export function getApiURL() {
   // let url = 'http://43.143.240.186:8989/api';
   // let url = 'http://127.0.0.1:8989/api';
-  let url = 'http://192.168.110.127/api';
+
+  //let url = 'http://192.168.110.127/api';
+  //let url = 'http://222.128.67.163:8866/api';
+  //let url = 'http://nnyun.w1.luyouxia.net:80/api';
+
+  let url = 'http://yiqi.nnyun.net:80/api';
   return url;
+}
+
+export function getFileURL() {
+  let url = 'http://222.128.67.163:8866/';
+  return url;
+}
+export function getTextApiKey() {
+  let api_key = '1sei2zuzrprgt03033r53uiwrxf8ijs3w4g8kyuflq1n6cui';
+  return api_key;
 }

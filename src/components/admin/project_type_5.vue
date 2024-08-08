@@ -156,54 +156,20 @@ export default {
             size:0,                                          //分页尺寸
             page:0                                           //分页页码
           };
-          console.log(param);
-          // this.loading = true;
           Ajax.postJson(url, param).then((resp) => {
-            console.log(resp)
-            // this.loading = false;
             if (resp.ok) {
-              //let data_info = this.table_data.datas;
               if(resp.body.data.length > 0){
                 this.gload_datas = resp.body.data
-                  // for(let i=0;i<resp.body.data.length;i++){
-                  //   for(let p=0;p<this.table_data.datas.length;p++){
-                  //     if(this.table_data.datas[p].id == resp.body.data[i]){
-
-                  //     }
-                  //   }
-                  //   this.table_data.datas.push(resp.body.data[i]);
-                  // }
               }
             }
           });
-          //this.table_data.datas.sort()
-          //console.log(this.table_data.datas);
-          // 生成新的div对象，这里简单起见只包含text属性
-          // const newDiv = { text: `Div ${this.table_data.datas.length + 1}` };
-          // 将新div添加到divs数组中
-          // this.table_data.datas.push(newDiv);
         },
-
-
-
-
         cancelTpoPage() {
           this.commentDialogVisible = false;
         },
         clearContent() {
 
-
         },
-        // filteredList() {
-        //     this.loading = true;
-        //     let url = '/prepare/get/project?id='+ this.lessonPreparationId +'&pid=0&prg=' + this.selected;
-        //     Ajax.get(url, null).then((resp) => {
-        //         this.loading = false;
-        //         if (resp.ok) {
-                    
-        //         } 
-        //     })
-        // },
         getDetail(){
           let url = '/prepare/reply/page';
           let param = {
@@ -273,14 +239,6 @@ export default {
         submitDel(id){
           Utils.confirm(this, '确定删除该记录 ？', (modal) => {
             modal.close();
-            // Ajax.postJson('/prepare/reply/delete', "id="+id).then((resp) => {
-            //   if (resp.ok) {
-            //     HeyUI.$Message.success('删除成功');
-            //     this.getDetail();
-            //   }else{
-            //     HeyUI.$Message.error(resp.msg);
-            //   }
-            // });
             const formData = new FormData();
             formData.append('id', id);
 

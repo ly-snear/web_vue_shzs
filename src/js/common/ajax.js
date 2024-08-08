@@ -74,7 +74,6 @@ let ajax = {
     }, extendParam);
   },
   ajax: function (param, extendParam) {
-    console
     // console.log('q-->', param);
     let params = Utils.extend({}, DefaultParam, param, extendParam || {});
     params.crossDomain = params.url.indexOf('http') === 0;
@@ -139,7 +138,6 @@ let ajax = {
           }
           resolve({ ok: false, msg: message });
         } else {
-          // console.log(extendParam);
           if (data.msg == 'token' && !data.ok && extendParam.auth != false) {
             HeyUI.$Message.warn('用户认证失败');
             localStorage.removeItem('token');

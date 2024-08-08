@@ -505,7 +505,7 @@ export default {
     });
     if (this.$route.query.token) {
       let token = this.$route.query.token;
-      // console.log('令牌：' + token);
+      console.log('令牌：' + token);
       this.loading = true;
       Ajax.get('/user/token', {
         token: token

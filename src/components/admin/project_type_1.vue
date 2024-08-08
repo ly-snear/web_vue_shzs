@@ -1,6 +1,6 @@
 <template>
     <div class='div-editor' style="margin-left: 8px;">
-      <editor v-model='rteInfo' api-key='pef4b8gvu2pbjsetn95he0i9luh4wp8wvyy9eb6bgxax4id6' :init="{
+      <editor v-model='rteInfo' :api-key="api_key" :init="{
          height: '260px',
          width: '99%',
          menubar: false,
@@ -54,7 +54,7 @@
 <script>
 
 import Editor from '@tinymce/tinymce-vue';
-import { htmlEncodeByRegExp, htmlDecodeByRegExp } from '../../js/common/utils';
+import { htmlEncodeByRegExp, htmlDecodeByRegExp ,getTextApiKey} from '../../js/common/utils';
 
 export default {
     components: {
@@ -63,14 +63,14 @@ export default {
     props:['pnp'],
     data() {
         return {
-            loading : true,
-            rteInfo:" ",
-            editId:0,
+          api_key:"",
+          loading : true,
+          rteInfo:" ",
+          editId:0,
         };
     },
     created() {
-        console.log("参数：");
-        console.log(this.pnp);
+        this.api_key = getTextApiKey();
         this.rteInfo = " ";
         this.getDetail();
     },
@@ -81,22 +81,10 @@ export default {
         clearContent() {
             this.rteInfo=" ";
         },
-        // filteredList() {
-        //     this.loading = true;
-        //     let url = '/prepare/get/project?id='+ this.lessonPreparationId +'&pid=0&prg=' + this.selected;
-        //     Ajax.get(url, null).then((resp) => {
-        //         this.loading = false;
-        //         if (resp.ok) {
-                    
-        //         } 
-        //     })
-        // },
         getDetail(){
             let url = '/prepare/content/get/pr?prepare='+this.pnp.id+'&project='+ this.pnp.project;
-            console.log(url);
             this.loading = true;
             Ajax.get(url, null).then((resp) => {
-                console.log(resp);
                 this.loading = false;
                 if (resp.ok) {
                     this.editId = resp.body.id;

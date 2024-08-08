@@ -1,8 +1,12 @@
+
+
 <template>
     <div class='content' style="margin-left: 8px;">
       <div style="border: 0px red solid;overflow: hidden;">
         <div class='div-editor' style="width: 100%;">
-          <editor v-model='rteInfo' api-key='pef4b8gvu2pbjsetn95he0i9luh4wp8wvyy9eb6bgxax4id6' :init="{
+          <!-- <TinymceEditor :value="content" @input="newContent"></TinymceEditor> -->
+
+          <editor v-model='rteInfo' :api-key="api_key" :init="{
             height: '260px',
             width: '99%',
             menubar: false,
@@ -49,7 +53,6 @@
               alignleft aligncenter alignright alignjustify | \
               bullist numlist outdent indent | table link image emoticons | searchreplace | removeformat'
           }" />
-          <!-- <button class="h-btn" style="float:right;margin-bottom: 8px; margin-right:8px;margin-top:8px;background-color: rgb(97, 158, 221);color:#FFF;" @click="saveDetail()">保存</button> -->
         </div>
 
         <div style="border: 0px solid red;width: 50%;margin-bottom: 10px;">
@@ -57,28 +60,27 @@
         </div>
       </div>
 
-
       <div style="border: 0px red solid;overflow: hidden;">
       <div style="border: 0px solid red;width: 50%;margin-bottom: 10px;">
           <Select v-model='resource_type_query.now' :datas='resource_type_query.selects' style="width: 99%;" placeholder='选择资源类型'></Select>
       </div>
 
-      <Table ref="table" :datas="table_data.datas" checkbox @select="onSelect" @on-selection-change="handleSelectionChange" style="margin-bottom: 10px;width: 99%;">
-          <!-- <TableItem title='' :width='200' align="center">
-            <template slot-scope='{ data }'>
-              <Checkbox :checked="setChecked(data)"></Checkbox>
-            </template>
-          </TableItem> -->
+      <Table ref="table" :datas="table_data.datas" @select="onSelect" @on-selection-change="handleSelectionChange" style="margin-bottom: 10px;width: 99%;">
           <TableItem title="序号" prop="$serial" :width='80' align="center"></TableItem>
-          <TableItem title="项目标题" :width='200' prop="title" treeOpener></TableItem>
-          <TableItem title="项目类型ID" :width='200' prop="type"></TableItem>
-          <TableItem title="项目类型" :width='200' prop="type_title"></TableItem>
-          <!-- <TableItem title='图标' :width='200' align="center">
-            <template slot-scope='{ data }'>
-              <img :src="data.icon" style="width: 28px;height: 28px;"/>
-            </template>
-          </TableItem>
-          <TableItem title="简介" prop="introduction"></TableItem> -->
+          <TableItem title="ID"  prop="id" :width='80' align="center"></TableItem>
+          <TableItem title="标题"  prop="title" :width='240' align="left"></TableItem>
+          <TableItem title="类型" prop="type_title"></TableItem>
+          <TableItem title="文件类型" prop="extension"></TableItem>
+          <TableItem title="文件大小" prop="size"></TableItem>
+          <!-- <TableItem title="地址" prop="url"></TableItem> -->
+          <TableItem title="操作人" prop="user_name"></TableItem>
+          <TableItem title='操作' :width='160' align="center">
+              <template slot-scope='{ data }'>
+                <div v-if="data.extension==='doc'||data.extension==='docx'||data.extension==='ppt'||data.extension==='xls'||data.extension==='xlsx'">
+                  <button class="h-btn h-btn-s h-btn-green" @click='fileEdit(data)'>参与备课文件编辑</button>
+                </div>
+              </template>
+            </TableItem>
       </Table>
 
       <Pagination
@@ -94,12 +96,9 @@
         <div style="border: 0px solid red;width: 100%;margin-bottom: 10px;">
           <Select v-model='resource_type.now' :datas='resource_type.selects' style="width: 99%;" placeholder='选择资源类型'></Select>
         </div>
-        <!-- <div style="border: 0px solid red;width: 99%; margin-bottom: 10px;">
-           <input type="file" @change="onFileChange" style="background-color: #FFF;width: 99%;height: 50px;float: left;"/> 
-        </div> -->
         <div style="border: 0px solid red;width: 99%; margin-bottom: 10px;">
           <input type="file" ref="fileInput" @change="onFileChange" style="position: relative;width: 100%;height: 50px;background-color: #FFF;" multiple>
-          <div style="height: 100px;"
+          <div style="height: 43px;border: 1px dashed red;"
             class="drop-zone"
             @dragover.prevent
             @drop.prevent="handleDrop">
@@ -113,81 +112,109 @@
           <button class="h-btn" style="float:left;margin-bottom: 8px; margin-top:8px;background-color: rgb(97, 158, 221);color:#FFF;width: 150px;" @click="uploadFile">保存教学资源文件</button>
         </div>
       </div>
+
+      <Modal v-model='fileDialogVisible' @close="" style="position: relative;">
+        <div  style="width: 1280px;overflow: hidden;">
+          <div id="wps" style="width: 100%; height: 800px;"></div>
+          <div slot="footer" class="dialog-footer" style="float: right;margin-top: 10px;">
+            <Button style="width: 150px;" @click='closeEdit'>取消</Button>
+          </div>
+        </div>
+      </Modal>
+
     </div>
-      
 
-
-
-    </div>
+  </div>
 </template>
 <script>
-
+import TinymceEditor from "./../../components/tinymce.vue"
+import WebOfficeSDK from './web-office-sdk-solution-v2.0.6.umd.js';
 import Editor from '@tinymce/tinymce-vue';
-import { htmlEncodeByRegExp, htmlDecodeByRegExp } from '../../js/common/utils';
-
+import { htmlEncodeByRegExp, htmlDecodeByRegExp,getTextApiKey } from '../../js/common/utils';
+ 
 export default {
     components: {
         'editor': Editor
     },
-    props:['pnp','proj'],
+    props:[
+      'pnp',
+      'proj'
+    ],
     data() {
         return {
-            filename:"+",
-            loading : true,
-            rteInfo:"",
-            rteInfo_title:"",
-            editId_content:0,
-            editId:0,
-            table_data: {
-              pagination: {
-                page: 1,
-                size: 6,
-                total: 0
-              },
-              datas: []
+          api_key:"",
+          content: "",
+            
+          fileDialogVisible: false,
+          filename:"+ 推拽文件到此",
+          loading : true,
+          rteInfo:"",
+          rteInfo_title:"",
+          editId_content:0,
+          editId:0,
+          table_data: {
+            pagination: {
+              page: 1,
+              size: 6,
+              total: 0
             },
-            disabled: false,
-            selectedFile: null,
-            file_detail:{
-              extension:"",
-              name:"",
-              size:0,
-              title:"",
-              url:""
-            },
-            resource_type: {
-              selects: [],
-              now: 0
-            },
-            resource_type_query: {
-              selects: [],
-              now: 0
-            },
-            file: null,
-            fileUrl: null
+            datas: []
+          },
+          disabled: false,
+          selectedFile: null,
+          file_detail:{
+            extension:"",
+            name:"",
+            size:0,
+            title:"",
+            url:""
+          },
+          resource_type: {
+            selects: [],
+            now: 0
+          },
+          resource_type_query: {
+            selects: [],
+            now: 0
+          },
+          file: null,
+          fileUrl: null,
+          user_id : 0,
+          user_token:null
             
         };
     },
     created() {
-      console.log(this.pnp.project)
+      this.api_key = getTextApiKey();
+      //console.log(this.generateGUID());
+      let user = this.$store.getters['user'];
+      this.user_id = user.id;
+      this.user_token = user.token;
+      //---------------------------------------------------
       if(this.pnp.project !== undefined && this.pnp.project !== null){
         
       }else{
         this.pnp.project = this.proj;
       }
-      console.log(this.pnp.project)
       this.rteInfo = "";
       this.rteInfo_title = "";
-      
+
       this.getContentInfo();
-      this.init_data();
-      this.resource_type = this.init_resource_type();
-      this.resource_type_query = this.init_resource_type();
+
+      setTimeout(()=>{
+        this.init_data();
+        this.resource_type = this.init_resource_type();
+        this.resource_type_query = this.init_resource_type();
+      },800);
     },
     mounted(){
 
     },
     methods: {
+        // 获取富文本的内容
+        newContent(val) {
+          this.content = val; // 直接更新 content 属性
+        },
         clearFile() {
           this.$refs.fileInput.value = ''; // 清空file文件
         },
@@ -211,8 +238,8 @@ export default {
         init_data(){
           let url = '/prepare/resource/list';
           let param = {
-            prepare: 34,                                                        //备课ID 所有参数都是可选的
-            content: 9,                                                         //备课项目内容ID
+            prepare: this.pnp.id,                                                        //备课ID 所有参数都是可选的
+            content: this.editId_content,                                                         //备课项目内容ID
             type: 0,                                                            //备课资源类型
             title: "",                                                          //备课资源标题
             extension: "",                                                      //备课资源扩展名称
@@ -233,14 +260,14 @@ export default {
             max_favorite: 20,                                                   //资源最多收藏数量
             min_reply: -1,                                                      //最少研讨数量
             max_reply: 5,                                                       //最多研讨数量
-            user: 75,                                                           //资源上传用户ID
+            user: this.user_id,                                                           //资源上传用户ID
             min_time: "2023-01-01",                                             //资源最早上传日期
             max_time: "2025-04-01",                                             //资源最晚上传日期
             user_name: ""                                                       //资源上传用户姓名
           };
           this.loading = true;
           Ajax.postJson(url, param).then((resp) => {
-            console.log(resp);
+            console.log(resp.body);
             this.loading = false;
             if (resp.ok) {
               this.setTable(resp.body);
@@ -279,12 +306,9 @@ export default {
             this.rteInfo=" ";
         },
         getContentInfo(){
-          console.log(this.pnp)
             let url = '/prepare/content/get/pr?prepare='+this.pnp.id+'&project='+ this.pnp.project;
-            console.log(url);
             this.loading = true;
             Ajax.get(url, null).then((resp) => {
-                console.log(resp);
                 this.loading = false;
                 if (resp.ok) {
                     this.editId_content = resp.body.id;
@@ -329,7 +353,6 @@ export default {
             HeyUI.$Message.error('请输入资源标题');
             return;
           }
-          console.log(this.file_detail);
           if (this.file_detail.size == 0) {
             HeyUI.$Message.error('请选择要上传的资源文件');
             return;
@@ -338,11 +361,10 @@ export default {
             HeyUI.$Message.error('请选择资源类型');
             return;
           }
-          console.log(this.pnp);
           let param = {
             id: this.editId,                                                        //资源ID 新增时为0 编辑时为要编辑的资源ID 必须提交
             prepare: this.pnp.id,                                                   //备课ID 当content=0时必须提交 content>0 可选
-            content: 2,                                                             //备课项目内容ID 当prepare=0时 必须提交 prepare>0 可选
+            content: this.editId_content,                                           //备课项目内容ID 当prepare=0时 必须提交 prepare>0 可选
             type: this.resource_type.now,                                           //资源类型 从资源类型接口获取 必须提交
             title: this.rteInfo_title,                                              //资源标题 必须提交
             name:this.file_detail.name,
@@ -362,11 +384,12 @@ export default {
             //"serial": "9cae74b9-1f2c-11ef-918e-00ff1bb61503"                      //资源序号 可选参数
           };
           Ajax.postJson("/prepare/resource/save", param).then((resp) => {
-              if (resp.ok) {
-                  HeyUI.$Message.success("保存成功！");
-              }
+            if (resp.ok) {
+              console.log(resp);
+              HeyUI.$Message.success("保存成功！");
+            }
           }).catch(ex => {
-              this.$Message.error(ex);
+            this.$Message.error(ex);
           });
         },
         onFileChange(e) {
@@ -387,14 +410,42 @@ export default {
               this.file_detail.size = resp.body.size;
               this.file_detail.title = resp.body.title;
               this.file_detail.url = resp.body.url;
-              console.log(this.file_detail);
               this.saveDetail();
             }
           });
         },
-
-
-
+        generateGUID() {
+          return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            var r = Math.random() * 16 | 0,
+            v = c === 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+          });
+        },
+        fileEdit(data){
+          this.fileDialogVisible = true;
+          setTimeout(()=>{
+            const instance = WebOfficeSDK.init({
+                officeType: WebOfficeSDK.OfficeType.Writer,
+                appId: 'SX20231025CUWYUE',
+                fileId: data.id,
+                token: this.user_token,
+                mount: '#wps',
+                cooperUserAttribute: {
+                    isCooperUsersAvatarVisible: false,
+                    cooperUsersColor: [
+                        {
+                            userId: '1',
+                            color: '#ff0000'
+                        }
+                    ]
+                }
+            })
+          },1000);
+        },
+        //关闭弹窗刷新父列表
+        closeEdit() {
+          this.fileDialogVisible = false;
+        },
 
 
 
