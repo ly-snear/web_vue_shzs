@@ -83,7 +83,7 @@
                 <div style="width: 100%;padding-left: 20px;padding-top: 10px;padding-right: 20px;background:#f1f1f1;overflow: hidden;">
                   <div style="width: 69%;float: left;height: 26px;">{{ item.content }}</div>
                   <div style="width: 30%;float: right;height: 26px;text-align: right;">
-                    <button style="width: 60px; color:#FFF;border: 0px;background-color: green;border-radius: 5px;" @click="like_discuss(item)">点赞</button>
+                    <!-- <button style="width: 60px; color:#FFF;border: 0px;background-color: green;border-radius: 5px;" @click="like_discuss(item)">点赞</button> -->
                     <button style="width: 60px; color:#FFF;border: 0px;background-color: brown;border-radius: 5px;" @click="remove_discuss(item)">删除</button>
                   </div>
                 </div>
@@ -311,7 +311,7 @@ export default {
           param = {
             id : data.id
           };
-          Ajax.post('/prepare/reply/praise', param).then((resp) => {
+          Ajax.post('/prepare/content/reply/praise', param).then((resp) => {
             if (resp.ok) {
               HeyUI.$Message.success('点赞成功');
               this.init_discuss_data();
@@ -333,7 +333,7 @@ export default {
             param = {
               id : data.id
             };
-            Ajax.post('/prepare/reply/delete', param).then((resp) => {
+            Ajax.post('/prepare/content/reply/delete', param).then((resp) => {
               if (resp.ok) {
                 HeyUI.$Message.success('删除成功');
                 this.init_discuss_data();
