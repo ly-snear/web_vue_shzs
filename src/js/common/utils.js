@@ -408,7 +408,7 @@ export function getApiURL() {
   //let url = 'http://222.128.67.163:8866/api';
   //let url = 'http://nnyun.w1.luyouxia.net:80/api';
 
-  let url = 'http://yiqi.nnyun.net:80/api';
+  let url = 'http://dev.nnyun.net:80/api';
   return url;
 }
 

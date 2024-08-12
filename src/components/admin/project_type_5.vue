@@ -10,6 +10,7 @@
           <div style="border:0px green solid;padding-left: 10px;font-weight: bold;overflow: hidden;background:#f1f1f1;">
             <div style="border:0px green solid;float: left;width: 30%;font-weight: bold;">
               <div v-if="item.pid ===0">
+                <!-- {{ item.id }} -->
                 <img :src="item.user_avatar" style="width: 28px;height: 28px;"/>
                 {{ item.user_name }} - {{ item.user_school===null?"学校":item.user_school }} 
               </div>
@@ -18,28 +19,28 @@
                 {{ item.user_name }} - {{ item.user_school===null?"学校":item.user_school }} -> {{ item.parent_user_name }} - {{ item.parent_user_school===null?"学校":item.parent_user_school }} 
               </div>
             </div>
-            <div style="border:0px red solid;float: right;width: 69%;text-align: right;padding-right: 20px;">
-              <button @click="addDiv(item.id)">&nbsp;{{ item.childs}}&nbsp;>></button>
+            <div style="border:0px red solid;float: right;width: 69%;text-align: right;padding-right: 20px;padding-top: 5px;">
+              <button style="width: 60px;border: 0px;background-color:cadetblue;border-radius: 5px;cursor: pointer;color: #f1f1f1;" @click="addDiv(item.id)">&nbsp;{{ item.childs}}&nbsp;+</button>
             </div>
           </div>
           <div style="border:0px green solid;padding-left: 20px;padding-top: 10px;padding-right: 20px;background:#f1f1f1;"><div>{{ item.content }}</div></div>
           <div style="border:0px green solid;padding-left: 10px;padding-top: 20px;padding-bottom: 10px;overflow: hidden;background:#f1f1f1;">
             <div style="border:0px green solid;float: left;width: 30%;">{{ item.time }}</div>
             <div style="border:0px red solid;float: right;width: 69%;text-align: right;padding-right: 20px;">
-              <button @click="submitLike">点赞</button>
-              <button @click="submitReply(item.id)">回复</button>
-              <button @click="submitDel(item.id)">删除</button>
+              <!-- <button @click="submitLike">点赞</button> -->
+              <button @click="submitReply(item.id)" style="width: 80px;background-color: #f9bc0b;border-radius: 5px;border: 0px;" >回复</button>
+              <!-- <button @click="submitDel(item.id)">删除</button> -->
             </div>
           </div>
 
-<!-- 
-          <div v-for="c of table_data.datas" :key="c.id">
-            <div v-if="c.childs > 0">
-11111111111
+            <!-- 
+                      <div v-for="c of table_data.datas" :key="c.id">
+                        <div v-if="c.childs > 0">
+            11111111111
 
-            </div>
-            <div v-else>
-22222222222222
+                        </div>
+                        <div v-else>
+            22222222222222
             </div>
           </div> -->
 
@@ -51,11 +52,18 @@
                 <!--  -->
                 <div style="width: 100%;border:0px green solid;overflow: hidden;">
                   <div style="border:0px green solid;padding-left: 20px;width: 30%;padding-right: 20px;overflow: hidden;float: left;">
-                    <div style="float: left;">{{ i.user_name }}<img :src="i.user_avatar" style="width: 28px;height: 28px;"/>{{ i.user_school }} -> {{ i.parent_user_name }}<img :src="i.parent_user_avatar" style="width: 28px;height: 28px;"/>{{ i.parent_user_school }}</div>
+                    <div style="float: left;">
+                      <!-- {{i.id}} -->
+                      {{ i.user_name }}
+                      <img :src="i.user_avatar" style="width: 28px;height: 28px;"/>
+                      {{ i.user_school }} -> {{ i.parent_user_name }}
+                      <img :src="i.parent_user_avatar" style="width: 28px;height: 28px;"/>
+                      {{ i.parent_user_school }}
+                    </div>
                   </div>
 
                   <div style="border:0px red solid;float: right;width: 69%;text-align: right;padding-right: 20px;overflow: hidden;">
-                    <button @click="addDiv(i.id)">&nbsp;{{ i.childs}}&nbsp;>></button>
+                    <!-- <button style="width: 40px;border: 0px;background-color:cadetblue;border-radius: 5px;color: #f1f1f1;" @click="addDiv(i.id)">&nbsp;{{ i.childs}}&nbsp;+</button>-->
                   </div>
                 </div>
 
@@ -64,11 +72,11 @@
                 </div>
 
                 <div style="border:0px green solid;padding-left: 10px;margin-top: 5px;overflow: hidden;width: 100%;">
-                  <div style="border:0px green solid;float: left;width: 30%;">{{ i.time }}</div>
-                  <div style="border:0px red solid;float: right;width: 69%;text-align: right;padding-right: 20px;">
-                    <button @click="submitLike">点赞</button>
-                    <button @click="submitReply(i.id)">回复</button>
-                    <button @click="submitDel">删除</button>
+                  <!-- <div style="border:0px green solid;float: left;width: 30%;">{{ i.time }}</div> -->
+                  <div style="width: 69%;float: left;height: 26px;">{{ i.time }}</div>
+                  <div style="width: 30%;float: right;height: 26px;text-align: right;">
+                    <button style="width: 60px; color:#FFF;border: 0px;background-color: green;border-radius: 5px;" @click="like_discuss(item)">点赞</button>
+                    <button style="width: 60px; color:#FFF;border: 0px;background-color: brown;border-radius: 5px;" @click="remove_discuss(item)">删除</button>
                   </div>
                 </div>
                 <!--  -->
@@ -78,13 +86,13 @@
           
         </div>
         <div style="width: 100%;border:0px green solid;float: left;margin-bottom: 8px;border-radius: 3px;padding-top: 3px;font-size: 18px;font-weight: bold;padding-left: 10px;">
-          发表回复
+          发表评论主题
         </div>
         <div style="width: 100%;border:0px green solid;float: left;margin-bottom: 8px;border-radius: 3px;padding-top: 3px;overflow: hidden;">
           <textarea style="width: 100%;min-height: 150px;"  v-model='form.content'></textarea>
         </div>
         <div style="width: 100%;border:0px green solid;float: left;margin-bottom: 18px;border-radius: 3px;padding-top: 3px;">
-          <button class="h-btn" style="float:left;margin-bottom: 8px; margin-top:8px;background-color: rgb(97, 158, 221);color:#FFF;width: 150px;" @click="saveDetail()">发表评论</button>
+          <button class="h-btn" style="float:left;margin-bottom: 8px; margin-top:8px;background-color: rgb(97, 158, 221);color:#FFF;width: 150px;" @click="saveDetail()">发表</button>
         </div>
     </div>
     <Modal v-model='commentDialogVisible' v-bind="params">
@@ -100,10 +108,13 @@
 </template>
 <script>
 import axios from 'axios';
+import { getApiURL } from '../../js/common/utils';
 export default {
     props:['pnp'],
     data() {
       return {
+        isButtonEnabled:true,
+        //----------------------
         if_childs:0,
         form:{
           content:"",
@@ -137,129 +148,152 @@ export default {
 
     },
     methods: {
-        // 添加div的方法
-        addDiv(pid) {
-          console.log(pid);
-          let url = '/prepare/reply/page';
-          let param = {
-            prepare:this.pnp.id,                        //备课ID 必须提交 以下的参数都是可选的
-            pid:pid,                                           //研讨ID
-            content:"",                                      //研讨内容
-            //"user":75,                                         //发表研讨内容的用户ID
-            user_name:"",                                    //发表研讨内容的用户姓名
-            min_praise:-1,                                   //被点赞的最小数量
-            max_praise:100,                                  //被点赞的最大数量
-            min_words:0,                                     //研讨内容的最少字数
-            max_words:100,                                   //研讨内容的最多字数
-            min_time:"",                           //参与研讨的最早日期
-            max_time:"",                           //参与研讨的最晚日期
-            size:0,                                          //分页尺寸
-            page:0                                           //分页页码
-          };
-          Ajax.postJson(url, param).then((resp) => {
+      getPrepareState(){
+        this.loading = true;
+        Ajax.get("/prepare/get?id="+this.pnp.id, null).then((resp) => {
+          this.loading = false;
+          if (resp.ok) {
+            if(resp.body.state == 3){
+              this.isButtonEnabled = false;
+            }
+          } 
+        })
+      },
+      // 添加div的方法
+      addDiv(pid) {
+        console.log(pid);
+        let url = '/prepare/reply/page';
+        let param = {
+          prepare:this.pnp.id,                        //备课ID 必须提交 以下的参数都是可选的
+          pid:pid,                                           //研讨ID
+          content:"",                                      //研讨内容
+          //"user":75,                                         //发表研讨内容的用户ID
+          user_name:"",                                    //发表研讨内容的用户姓名
+          min_praise:-1,                                   //被点赞的最小数量
+          max_praise:100,                                  //被点赞的最大数量
+          min_words:0,                                     //研讨内容的最少字数
+          max_words:100,                                   //研讨内容的最多字数
+          min_time:"",                           //参与研讨的最早日期
+          max_time:"",                           //参与研讨的最晚日期
+          size:0,                                          //分页尺寸
+          page:0                                           //分页页码
+        };
+        Ajax.postJson(url, param).then((resp) => {
+          if (resp.ok) {
+            if(resp.body.data.length > 0){
+              this.gload_datas = resp.body.data
+            }
+          }
+        });
+      },
+      cancelTpoPage() {
+        this.commentDialogVisible = false;
+      },
+      clearContent() {
+
+      },
+      getDetail(){
+        let url = '/prepare/reply/page';
+        let param = {
+          prepare:this.pnp.id,                        //备课ID 必须提交 以下的参数都是可选的
+          pid:0,                                           //研讨ID
+          content:"",                                      //研讨内容
+          //"user":75,                                         //发表研讨内容的用户ID
+          user_name:"",                                    //发表研讨内容的用户姓名
+          min_praise:-1,                                   //被点赞的最小数量
+          max_praise:100,                                  //被点赞的最大数量
+          min_words:0,                                     //研讨内容的最少字数
+          max_words:100,                                   //研讨内容的最多字数
+          min_time:"",                           //参与研讨的最早日期
+          max_time:"",                           //参与研讨的最晚日期
+          size:0,                                          //分页尺寸
+          page:0                                           //分页页码
+        };
+        console.log(param);
+        this.loading = true;
+        Ajax.postJson(url, param).then((resp) => {
+          console.log(resp)
+          this.loading = false;
+          if (resp.ok) {
+            let idx = this.table_data.pagination.page - 1;
+            let list = resp.body.data.slice(idx * 8, (idx + 1) * 8);
+            this.table_data.datas = list;
+          }
+        });
+      },
+      saveDetail(){
+        let param = {
+          id:this.editId,                                         //备课研讨ID 新增时为0 编辑时为编辑的研讨ID 必须提交
+          pid:this.pid,                                                  //上级备课研讨ID 可选参数 默认0 表示顶级研讨
+          content:this.form.content,                              //备课研讨内容 必须提交 html内容需要编码
+          praise:0,                                               //点赞数量 可选参数 默认0
+          share:0,                                                //分享数量 可选参数 默认0
+          favorite:0,                                             //收藏数量 可选参数 默认0
+          reply:0,                                                //研讨数量 可选参数 默认0
+          prepare:this.pnp.id                                     //备课ID id=0 或者 pid=0时必须提交 pid>0为可选参数
+        };
+        if(this.form.content == ""){
+            this.$Message.error("内容不允许为空！");
+            return;
+        }
+        Ajax.postJson("/prepare/reply/save", param).then((resp) => {
             if (resp.ok) {
-              if(resp.body.data.length > 0){
-                this.gload_datas = resp.body.data
-              }
+                HeyUI.$Message.success("保存成功！");
+                this.getDetail();
+                setTimeout(()=>{
+                  this.addDiv(this.pid)
+                  this.form.content = "";
+                  this.pid = 0;
+                  this.commentDialogVisible = false;
+                },1000);
             }
-          });
-        },
-        cancelTpoPage() {
-          this.commentDialogVisible = false;
-        },
-        clearContent() {
+        }).catch(ex => {
+            this.$Message.error(ex);
+        });
+      },
+      //研讨-点赞
+      like_discuss(data) {
+        let param={};
+        param = {
+          id : data.id
+        };
+        Ajax.post('/prepare/reply/praise', param).then((resp) => {
+          if (resp.ok) {
+            HeyUI.$Message.success('点赞成功');
+            this.getDetail();
+          }else{
+            HeyUI.$Message.error(resp.msg);
+          }
+        });
+      },
+      //研讨-删除
+      remove_discuss(data) {
+        if(!this.isButtonEnabled){
+          HeyUI.$Message.error('当前备课已结束，不允许本操作！');
+          return;
+        }
 
-        },
-        getDetail(){
-          let url = '/prepare/reply/page';
-          let param = {
-            prepare:this.pnp.id,                        //备课ID 必须提交 以下的参数都是可选的
-            pid:0,                                           //研讨ID
-            content:"",                                      //研讨内容
-            //"user":75,                                         //发表研讨内容的用户ID
-            user_name:"",                                    //发表研讨内容的用户姓名
-            min_praise:-1,                                   //被点赞的最小数量
-            max_praise:100,                                  //被点赞的最大数量
-            min_words:0,                                     //研讨内容的最少字数
-            max_words:100,                                   //研讨内容的最多字数
-            min_time:"",                           //参与研讨的最早日期
-            max_time:"",                           //参与研讨的最晚日期
-            size:0,                                          //分页尺寸
-            page:0                                           //分页页码
+        Utils.confirm(this, '确定删除该记录 ？', (modal) => {
+          modal.close();
+          let param={};
+          param = {
+            id : data.id
           };
-          console.log(param);
-          this.loading = true;
-          Ajax.postJson(url, param).then((resp) => {
-            console.log(resp)
-            this.loading = false;
+          Ajax.post('/prepare/reply/delete', param).then((resp) => {
             if (resp.ok) {
-              let idx = this.table_data.pagination.page - 1;
-              let list = resp.body.data.slice(idx * 8, (idx + 1) * 8);
-              this.table_data.datas = list;
+              HeyUI.$Message.success('删除成功');
+              this.getDetail();
+            }else{
+              HeyUI.$Message.error(resp.msg);
             }
           });
-        },
-        saveDetail(){
-            let param = {
-              id:this.editId,                                         //备课研讨ID 新增时为0 编辑时为编辑的研讨ID 必须提交
-              pid:this.pid,                                                  //上级备课研讨ID 可选参数 默认0 表示顶级研讨
-              content:this.form.content,                              //备课研讨内容 必须提交 html内容需要编码
-              praise:0,                                               //点赞数量 可选参数 默认0
-              share:0,                                                //分享数量 可选参数 默认0
-              favorite:0,                                             //收藏数量 可选参数 默认0
-              reply:0,                                                //研讨数量 可选参数 默认0
-              prepare:this.pnp.id                                     //备课ID id=0 或者 pid=0时必须提交 pid>0为可选参数
-            };
-            if(this.form.content == ""){
-                this.$Message.error("内容不允许为空！");
-                return;
-            }
-            Ajax.postJson("/prepare/reply/save", param).then((resp) => {
-                if (resp.ok) {
-                    HeyUI.$Message.success("保存成功！");
-                    this.getDetail();
-                    setTimeout(()=>{
-                      this.addDiv(this.pid)
-                      this.form.content = "";
-                      this.pid = 0;
-                    },1000);
-                }
-            }).catch(ex => {
-                this.$Message.error(ex);
-            });
-        },
-        submitLike(){
-
-        },
-        submitReply(pid){
-          console.log(pid);
-          this.pid = pid;
-          this.commentDialogVisible = true;
-        },
-        submitDel(id){
-          Utils.confirm(this, '确定删除该记录 ？', (modal) => {
-            modal.close();
-            const formData = new FormData();
-            formData.append('id', id);
-
-            axios({
-              url:'http://192.168.110.127/api/prepare/reply/delete',
-                method:'post',
-                formData,
-                headers:{
-                  'Content-Type':'multipart/form-data'
-                }
-            }).then(res=>{
-              if(res.status){
-                this.$message.success(123)
-              }else{
-                this.$message.success(456)
-              }
-            })
-          });
-        },
-
-
+        });
+      },
+      submitReply(pid){
+        console.log(pid);
+        this.pid = pid;
+        this.commentDialogVisible = true;
+      },
 
 
 

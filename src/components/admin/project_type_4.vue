@@ -5,8 +5,8 @@
 
       </div>
       <div style="width: 30%;height: 40px;border: 0px red dashed;float: right;text-align: right;line-height: 40px;">
-        <button class="h-btn h-btn-blue" style="width: 40%; height: 30px;" @click='opened3=true'>本地上传</button>
-        <button class="h-btn h-btn-blue" style="width: 40%; height: 30px;" @click='open()'>选择资源</button>
+        <button v-show="isButtonEnabled" class="h-btn h-btn-blue" style="width: 40%; height: 30px;" @click='opened3=true'>本地上传</button>
+        <button v-show="isButtonEnabled" class="h-btn h-btn-blue" style="width: 40%; height: 30px;" @click='open()'>选择资源</button>
       </div>
     </div>
     <Table ref="table" :datas="table_data.datas"  @select="onSelect" @on-selection-change="handleSelectionChange" style="margin-bottom: 10px;width: 99%;">
@@ -17,11 +17,16 @@
       <TableItem title="文件类型" prop="extension"></TableItem>
       <TableItem title="文件大小" prop="size"></TableItem>
       <TableItem title="操作人" prop="user_name"></TableItem>
-      <TableItem title='操作' :width='160' align="center">
+      <TableItem title='操作' :width='170' align="center">
         <template slot-scope='{ data }'>
-          <div v-if="data.extension==='doc'||data.extension==='docx'||data.extension==='ppt'||data.extension==='xls'||data.extension==='xlsx'">
-            <button class="h-btn h-btn-s h-btn-green" @click='fileEdit(data)'>参与备课文件编辑</button>
+          <div style="float: left;margin-right: 7px;" v-if="data.extension==='doc'||data.extension==='docx'||data.extension==='ppt'||data.extension==='xls'||data.extension==='xlsx'">
+            <button class="h-btn h-btn-s h-btn-blue" @click='fileEdit(data)'>参与</button>
           </div>
+          <div style="float: left;">
+            <button class="h-btn h-btn-s h-btn-green" @click='toggleDiscussResourceDiv(data)'>研讨</button>
+            <button class="h-btn h-btn-s h-btn-red" @click='remove_resource(data)'>删除</button>
+          </div>
+          
         </template>
       </TableItem>
     </Table>
@@ -43,7 +48,7 @@
     </Modal>
 
     <Modal v-model='opened3'>
-      <div style="border: 0px solid red;width: 50%;">
+      <div style="border: 0px solid red;width: 600px;overflow: hidden;">
         <div style="border: 0px solid red;width: 100%;margin-bottom: 10px;">
           <input v-model="rteInfo_title" type='text' placeholder='请输入资源标题' style="width: 99%;"/>
         </div>
@@ -166,9 +171,65 @@
           </Cell>
         </Row>
       </div>
+      <div style="float: right;">
+        <button class="h-btn" style="float:left;margin-bottom: 8px; margin-top:8px;color:#000;width: 150px;" @click="clearUploadFile">取消</button>
+      </div>
     </Modal>
 
+    <!-- 上传资源文件和列表 end -->
+    <Modal v-model='discussResourceFrom'>
+        <div  style="width: 800px;overflow: hidden;">
+          <div style="width: 100%;height: 150px;">
+            <textarea style="width: 100%;min-height: 150px;"  v-model='discuss_content'></textarea>
+          </div>
+          
+          <div slot="footer" class="dialog-footer" style="float: right;margin-top: 10px;">
+            <button class="h-btn" style="width: 86px; float:left;margin-bottom: 8px; margin-right:8px;margin-top:8px;color:#000;" @click="clear_discuss_from" >取消</button>
+            <button class="h-btn" style="width: 86px; float:left;margin-bottom: 8px; margin-top:8px;background-color: rgba(112, 182, 3, 1);color:#FFF;" @click="submit_discuss_data" >提交</button>
+          </div>
+          <!-- 探讨 begin -->
+          <div style="width: 100%; overflow: hidden;background-color: #dfdcd8;">
+            <div style="border: 0px solid red;height: 500px;" >
+              <div v-for="(item, index) in table_discuss_data.datas" :key="index"
+                style="width: 100%;border:0px green solid;float: left;padding: 3px;">
 
+                <div style="border:0px green solid;padding-left: 10px;font-weight: bold;background:#f1f1f1;float: left;width: 100%;border-radius: 8px;">
+                  <div style="border:0px green solid;float: left;width: 100%;font-weight: bold;">
+                    <div v-if="item.pid ===0">
+                      <div style="float: left;">
+                        <div style="float: left;"><img :src="item.user_avatar" style="width: 28px;height: 28px;margin-top: 5px;"/></div>
+                        <div style="float: left;margin-top: 10px;margin-left: 5px;">{{ item.user_name }}</div>
+                      </div>
+                      <div style="float: right;padding-top: 8px;padding-right: 5px;">
+                        {{ item.time }}
+                      </div>
+                    </div>
+                    <div v-else>
+                      <img :src="item.user_avatar" style="width: 28px;height: 28px;"/>
+                      {{ item.user_name }} -> {{ item.parent_user_name }} {{ item.time }}
+                    </div>
+                  </div> 
+                </div>
+
+                <div style="border:0px green solid;width: 100%;padding-left: 20px;padding-top: 10px;padding-right: 20px;background:#f1f1f1;float: left;">
+                  <div style="width: 69%;float: left;height: 26px;">{{ item.content }}</div>
+                  <div style="width: 30%;float: right;height: 26px;text-align: right;">
+                    <button style="width: 60px; color:#FFF;border: 0px;background-color: green;border-radius: 5px;" @click="like_discuss(item)">点赞</button>
+                    <button style="width: 60px; color:#FFF;border: 0px;background-color: brown;border-radius: 5px;" @click="remove_discuss(item)">删除</button>
+                  </div>
+                </div>
+
+              </div>
+              <br/>
+              <div style="width: 100%;float: left;padding-bottom: 8px;border-radius: 3px;padding-top: 3px;margin-top: 8px;">
+                <Pagination align='center' layout='pager' v-model='table_discuss_data.pagination' @change='init_discuss_data'></Pagination>
+              </div>
+
+            </div>
+          </div>
+          <!-- 探讨 end -->
+        </div>
+      </Modal>
 
   </div>
 
@@ -187,6 +248,8 @@ export default {
     props:['pnp','proj'],
     data() {
         return {
+          isButtonEnabled:true,
+          //----------------------
             loading : true,
             table_data: {
               pagination: {
@@ -250,6 +313,17 @@ export default {
               tabledatas: []
             },
             //---------------------
+            discussResourceFrom:false,
+            discuss_content:"",
+            table_discuss_data: {
+              pagination: {
+                page: 1,
+                size: 6,
+                total: 0
+              },
+              datas: []
+            },
+            discuss_id:0,
         };
     },
     created() {
@@ -284,11 +358,24 @@ export default {
       this.init_data();
       //-----------------
       this.resource_type = this.init_resource_type();
+      //-----------------
+      this.getPrepareState();
     },
     mounted(){
 
     },
     methods: {
+      getPrepareState(){
+        this.loading = true;
+        Ajax.get("/prepare/get?id="+this.pnp.id, null).then((resp) => {
+          this.loading = false;
+          if (resp.ok) {
+            if(resp.body.state == 3){
+              this.isButtonEnabled = false;
+            }
+          } 
+        })
+      },
       //获取备课资源列表(resource,'03_获取备课（项目）资源列表',prepare/resource/list)
       init_data(){
         let url = '/prepare/resource/list';
@@ -326,6 +413,7 @@ export default {
           if (resp.ok) {
             this.setTable(resp.body);
           } else {
+
           }
         })
       },
@@ -369,7 +457,7 @@ export default {
       //----------------------------------------------------------------------------------------------------
       open() {
         this.opened2 = true;
-        console.log('准备导入：资源');
+        //console.log('准备导入：资源');
         setTimeout(() => {
           this.$refs.menuTree.expandAll();
         }, 400);
@@ -481,21 +569,20 @@ export default {
       reload(file) {
         Utils.confirm(this, '确定导入该文件 ？', (modal) => {
           modal.close();
-          console.log(file.name.split('.').pop())
-          this.opened2 = false;
+
           let param = {
-            id: 0,                                                        //资源ID 新增时为0 编辑时为要编辑的资源ID 必须提交
+            id: 0,                                                                  //资源ID 新增时为0 编辑时为要编辑的资源ID 必须提交
             prepare: this.pnp.id,                                                   //备课ID 当content=0时必须提交 content>0 可选
-            content: 0,                                           //备课项目内容ID 当prepare=0时 必须提交 prepare>0 可选
-            type: 1,                                           //资源类型 从资源类型接口获取 必须提交
-            title: file.name,                                              //资源标题 必须提交
+            content: 0,                                                             //备课项目内容ID 当prepare=0时 必须提交 prepare>0 可选
+            type: 5,                                                                //资源类型 从资源类型接口获取 必须提交
+            title: file.name,                                                       //资源标题 必须提交
             name:file.name,
-            url: file.url,                                              //资源地址 必须提交
+            url: file.url,                                                          //资源地址 必须提交
             extension: file.name.split('.').pop(),                                  //资源扩展文件名称 可选参数
             isedit: 1,                                                              //资源是否可以编辑 1:允许 0:禁止 可选参数
             //"edits": 0,                                                           //资源编辑次数 可选参数
-            //"version": "第一稿",                                                   //资源版本 可选参数
-            size: 0,                                            //资源文件大小 计量单位字节 可选参数
+            //"version": "第一稿",                                                  //资源版本 可选参数
+            size: 0,                                                                //资源文件大小 计量单位字节 可选参数
             isdownload: 0,                                                          //资源是否允许下载 1:允许 0:禁止 可选参数
             downloads: 0,                                                           //资源下载次数 可选参数
             browse: 0,                                                              //资源浏览次数 可选参数
@@ -505,12 +592,13 @@ export default {
             reply: 0                                                                //资源研讨次数 可选参数
             //"serial": "9cae74b9-1f2c-11ef-918e-00ff1bb61503"                      //资源序号 可选参数
           };
+          console.log(param);
           Ajax.postJson("/prepare/resource/save", param).then((resp) => {
-            console.log(resp);
             if (resp.ok) {
               HeyUI.$Message.success("导入成功");
               this.init_data();
             }else{
+              console.log(resp.msg);
               this.$Message.error(resp.msg);
             }
           }).catch(ex => {
@@ -614,11 +702,137 @@ export default {
       clearFile() {
         this.$refs.fileInput.value = ''; // 清空file文件
       },
+      clearUploadFile() {
+        this.opened2 = false;
+      },
+      remove_resource(data) {
+        if(!this.isButtonEnabled){
+          HeyUI.$Message.error('当前备课已结束，不允许本操作！');
+          return;
+        }
+        Utils.confirm(this, '确定删除该记录 ？', (modal) => {
+          modal.close();
+          let ls = new Array();
+          ls.push(data.id);
+          Ajax.postJson('/prepare/resource/delete', ls).then((resp) => {
+            console.log(resp);
+            if (resp.ok) {
+              HeyUI.$Message.success('删除成功');
+              this.init_data();
+            }else{
+              HeyUI.$Message.error(resp.msg);
+            }
+          });
+        });
+      },
+      toggleDiscussResourceDiv(data) {
+        this.discussResourceFrom = !this.discussResourceFrom;
+        if(this.discussResourceFrom){
+          this.discuss_id = data.id;
+          this.init_discuss_data();
+        }
+      },
+      init_discuss_data(){
+          let url = '/prepare/resource/reply/page';
+          let param = {
+            "resource":this.discuss_id,                        //备课（项目）资源ID 必须提交 以下的参数都是可选的
+            //"project":0,                                       //备课（项目）内容ID
+            "pid":0,                                           //研讨ID
+            "content":"",                                      //研讨内容
+            //"user":75,                                         //发表研讨内容的用户ID
+            "user_name":"",                                    //发表研讨内容的用户姓名
+            "min_praise":-1,                                   //被点赞的最小数量
+            "max_praise":100,                                  //被点赞的最大数量
+            "min_words":0,                                     //研讨内容的最少字数
+            "max_words":100,                                   //研讨内容的最多字数
+            "min_time":"2024-02-01",                           //参与研讨的最早日期
+            "max_time":"2024-10-01",                           //参与研讨的最晚日期
+            "size":0,                                          //分页大小
+            "page":0                                           //分页页码
+          };
+          this.loading = true;
+          Ajax.postJson(url, param).then((resp) => {
+            this.loading = false;
+            if (resp.ok) {
+              let idx = this.table_discuss_data.pagination.page - 1;
+              let list = resp.body.data.slice(idx * 6, (idx + 1) * 6);
+              this.table_discuss_data.datas = list;
+              this.table_discuss_data.pagination.total = resp.body.data.length;
+            }
+          });
+        },
+        submit_discuss_data(){
+          let content = '';
+          if (this.discuss_content && this.discuss_content.length > 0) {
+            content = htmlEncodeByRegExp(this.discuss_content);
+          }
+          let param = {
+            "id":0,                                                   //备课（项目）研讨ID 新增时为0 编辑时为编辑的研讨ID 必须提交
+            "pid":0,                                                  //上级研讨ID 可选参数 默认0 表示顶级研讨
+            "content":this.discuss_content,     //研讨内容 必须提交 html内容需要编码
+            "praise":0,                                               //点赞数量 可选参数 默认0
+            "share":0,                                                //分享数量 可选参数 默认0
+            "favorite":0,                                             //收藏数量 可选参数 默认0
+            "reply":0,                                                //研讨数量 可选参数 默认0
+            "resource":this.discuss_id,                               //备课（项目）资源ID id=0 或者 pid=0时必须提交 pid>0为可选参数
+            "project":0                                               //备课（项目）内容ID id=0 或者 pid=0时必须提交 pid>0为可选参
+          };
+          if(this.discuss_content == ""){
+            HeyUI.$Message.error("研讨内容不允许为空！");
+            return;
+          }
+          Ajax.postJson("/prepare/resource/reply/save", param).then((resp) => {
+            if (resp.ok) {
+              HeyUI.$Message.success("保存成功！");
+              this.init_discuss_data();
+              this.discuss_content = "";
+            }
+          }).catch(ex => {
+            HeyUI.$Message.error(ex);
+          });
+        },
+        //研讨-点赞
+        like_discuss(data) {
+          let param={};
+          param = {
+            id : data.id
+          };
+          Ajax.post('/prepare/resource/reply/praise', param).then((resp) => {
+            if (resp.ok) {
+              HeyUI.$Message.success('点赞成功');
+              this.init_discuss_data();
+            }else{
+              HeyUI.$Message.error(resp.msg);
+            }
+          });
+        },
+        //研讨-删除
+        remove_discuss(data) {
+          if(!this.isButtonEnabled){
+            HeyUI.$Message.error('当前备课已结束，不允许本操作！');
+            return;
+          }
 
-
-
-
-
+          Utils.confirm(this, '确定删除该记录 ？', (modal) => {
+            modal.close();
+            let param={};
+            param = {
+              id : data.id
+            };
+            Ajax.post('/prepare/resource/reply/delete', param).then((resp) => {
+              if (resp.ok) {
+                HeyUI.$Message.success('删除成功');
+                this.init_discuss_data();
+              }else{
+                HeyUI.$Message.error(resp.msg);
+              }
+            });
+          });
+        },
+        clear_discuss_from(){
+          this.discussResourceFrom = false;
+          this.discuss_content = "";
+        },
 
 
 

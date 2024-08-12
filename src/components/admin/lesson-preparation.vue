@@ -288,7 +288,7 @@
                 <div style="border: 0px blue solid;height: 50px;">
                   <FormItem label='学科' prop='course'>
                     <Select
-                      v-model='addForm.course'
+                      v-model='course_create.now'
                       :datas="course_create.selects"
                       @change='changeQueryCourse_create'
                       placeholder='选择学科'
@@ -607,7 +607,7 @@ export default {
         participate_form_opened:false,//导入模板窗体
         loading: false,
         // 新增窗体
-        validationRules:{ required: ['type','subject','stage','grade','term','course']},
+        validationRules:{ required: ['type','subject','stage','grade','term']},
         submitLoading: false,
         confirmSelectionLoading:false,
         homePageStatisticsFields:{
@@ -852,10 +852,26 @@ export default {
         let selects = [];
         Ajax.get('/prepare/course/list', {}).then(resp => {
           if (resp.ok) {
+            for(let i = 0;i<resp.body.length;i++){
+              selects.push({
+                title: resp.body[i],
+                key: resp.body[i]
+              });
+            }
+          }
+        });
+        return {selects,now};
+      },
+      //教材版本
+      init_textbook_list_main(){
+        let now = "";
+        let selects = [];
+        Ajax.get('/prepare/textbook/list?course='+this.course_main.now, {}).then(resp => {
+          if (resp.ok) {
             resp.body.forEach(e => {
               selects.push({
-                title: e,
-                key: e
+                title: e.title,
+                key: e.id
               });
             });
           }
@@ -863,17 +879,15 @@ export default {
         return {selects,now};
       },
       //教材版本
-      init_textbook_list(){
+      init_textbook_list_create(){
         let now = "";
         let selects = [];
-        Ajax.get('/prepare/textbook/list?course='+this.course_main.now, {}).then(resp => {
+        Ajax.get('/prepare/textbook/list?course='+this.course_create.now, {}).then(resp => {
           if (resp.ok) {
-            console.log(resp.body);
             resp.body.forEach(e => {
-              console.log(e);
               selects.push({
-                title: e,
-                key: e
+                title: e.title,
+                key: e.id
               });
             });
           }
@@ -1087,14 +1101,14 @@ export default {
       },
       changeQueryCourse_main(){
         this.init_data();
-        this.textbook_main = this.init_textbook_list();
+        this.textbook_main = this.init_textbook_list_main();
       },
       changeQuerytextbook_main(){
         this.init_data();
       },
       changeQueryCourse_create(){
-        //this.init_data();
-        this.textbook_create = this.init_textbook_list();
+        //console.log(this.course_create);
+        this.textbook_create = this.init_textbook_list_create();
       },
       changeQuerytextbook_create(){
         //this.init_data();
@@ -1126,7 +1140,7 @@ export default {
             this.$Message.error(`请选择年级`);
             return
           }
-          if(this.grade.now == 0){
+          if(this.course_create.now == 0){
             this.$Message.error(`请选择学科`);
             return
           }
@@ -1135,6 +1149,7 @@ export default {
           this.addForm.stage = this.stage.now;
           this.addForm.grade = this.grade.now;
           this.addForm.cover = this.file;
+          this.addForm.course = this.course_create.now;
           
           if(this.template_id>0){
             this.addForm.template = this.template_id;
@@ -1148,6 +1163,7 @@ export default {
                 id: this.editId
               };
             }
+            console.log('保存参数');
             console.log(param);
             Ajax.postJson(url, param).then((resp) => {
               console.log(resp);
