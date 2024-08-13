@@ -3,14 +3,9 @@
     <div style="width: 100%;border:0px green solid;float: left;margin-bottom: 8px;border-radius: 3px;overflow: hidden;">
         <div v-for="(item, index) in table_data.datas" :key="index"
           style="width: 100%;border:0px green solid;float: left;padding-bottom: 8px;border-radius: 3px;padding-top: 3px;">
-          <!-- <div style="border:0px green solid;text-align: center;width: 100%;height: 49%;">
-            <img class="icon-x" style="border-radius: 8px;width: 96%;height: 100%;padding: 2px;" :src="item.cover" @error="handleImageError" />
-          </div> -->
-          <!-- <div style="border:0px green solid;"><p class="dark2-color" style="text-align: center;margin-top: 1px;font-size: 18px;font-family:'微软雅黑';color: #ffffff !important;">{{ item.subject }}</p></div> -->
           <div style="border:0px green solid;padding-left: 10px;font-weight: bold;overflow: hidden;background:#f1f1f1;">
             <div style="border:0px green solid;float: left;width: 30%;font-weight: bold;">
               <div v-if="item.pid ===0">
-                <!-- {{ item.id }} -->
                 <img :src="item.user_avatar" style="width: 28px;height: 28px;"/>
                 {{ item.user_name }} - {{ item.user_school===null?"学校":item.user_school }} 
               </div>
@@ -27,43 +22,22 @@
           <div style="border:0px green solid;padding-left: 10px;padding-top: 20px;padding-bottom: 10px;overflow: hidden;background:#f1f1f1;">
             <div style="border:0px green solid;float: left;width: 30%;">{{ item.time }}</div>
             <div style="border:0px red solid;float: right;width: 69%;text-align: right;padding-right: 20px;">
-              <!-- <button @click="submitLike">点赞</button> -->
               <button @click="submitReply(item.id)" style="width: 80px;background-color: #f9bc0b;border-radius: 5px;border: 0px;" >回复</button>
-              <!-- <button @click="submitDel(item.id)">删除</button> -->
             </div>
           </div>
-
-            <!-- 
-                      <div v-for="c of table_data.datas" :key="c.id">
-                        <div v-if="c.childs > 0">
-            11111111111
-
-                        </div>
-                        <div v-else>
-            22222222222222
-            </div>
-          </div> -->
-
-
 
           <div v-if="gload_datas!=null && gload_datas.length>0" >
             <div v-if="gload_datas[0].pid>0 && gload_datas[0].pid===item.id">
               <div v-for="(i,p) in gload_datas" style="border-bottom:1px green solid;border-radius: 5px; padding-bottom: 8px; margin-left: 20px;margin-top: 10px;margin-bottom: 10px;overflow: hidden;background:#f1f1f1;">
-                <!--  -->
                 <div style="width: 100%;border:0px green solid;overflow: hidden;">
                   <div style="border:0px green solid;padding-left: 20px;width: 30%;padding-right: 20px;overflow: hidden;float: left;">
                     <div style="float: left;">
-                      <!-- {{i.id}} -->
                       {{ i.user_name }}
                       <img :src="i.user_avatar" style="width: 28px;height: 28px;"/>
                       {{ i.user_school }} -> {{ i.parent_user_name }}
                       <img :src="i.parent_user_avatar" style="width: 28px;height: 28px;"/>
                       {{ i.parent_user_school }}
                     </div>
-                  </div>
-
-                  <div style="border:0px red solid;float: right;width: 69%;text-align: right;padding-right: 20px;overflow: hidden;">
-                    <!-- <button style="width: 40px;border: 0px;background-color:cadetblue;border-radius: 5px;color: #f1f1f1;" @click="addDiv(i.id)">&nbsp;{{ i.childs}}&nbsp;+</button>-->
                   </div>
                 </div>
 
@@ -72,14 +46,11 @@
                 </div>
 
                 <div style="border:0px green solid;padding-left: 10px;margin-top: 5px;overflow: hidden;width: 100%;">
-                  <!-- <div style="border:0px green solid;float: left;width: 30%;">{{ i.time }}</div> -->
-                  <div style="width: 69%;float: left;height: 26px;">{{ i.time }}</div>
+                  <div style="width: 69%;float: left;overflow: hidden;">{{ i.time }}</div>
                   <div style="width: 30%;float: right;height: 26px;text-align: right;">
-                    <!-- <button style="width: 60px; color:#FFF;border: 0px;background-color: green;border-radius: 5px;" @click="like_discuss(item)">点赞</button> -->
                     <button style="width: 60px; color:#FFF;border: 0px;background-color: brown;border-radius: 5px;" @click="remove_discuss(item)">删除</button>
                   </div>
                 </div>
-                <!--  -->
               </div>
             </div>
           </div>
@@ -107,8 +78,6 @@
   </div>
 </template>
 <script>
-import axios from 'axios';
-import { getApiURL } from '../../js/common/utils';
 export default {
     props:['pnp'],
     data() {

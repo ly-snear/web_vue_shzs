@@ -212,7 +212,7 @@
                 </div>
 
                 <div style="border:0px green solid;width: 100%;padding-left: 20px;padding-top: 10px;padding-right: 20px;background:#f1f1f1;float: left;">
-                  <div style="width: 69%;float: left;height: 26px;">{{ item.content }}</div>
+                  <div style="width: 69%;float: left;overflow: hidden;">{{ item.content }}</div>
                   <div style="width: 30%;float: right;height: 26px;text-align: right;">
                     <!-- <button style="width: 60px; color:#FFF;border: 0px;background-color: green;border-radius: 5px;" @click="like_discuss(item)">点赞</button> -->
                     <button style="width: 60px; color:#FFF;border: 0px;background-color: brown;border-radius: 5px;" @click="remove_discuss(item)">删除</button>

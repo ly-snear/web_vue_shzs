@@ -2,7 +2,9 @@
   <div style="overflow: hidden;">
     <div class='div-editor' style="margin-left: 8px;">
       <div style="width: 100%;border: 0px solid red;overflow: hidden;">
-        <editor v-model='rteInfo' :api-key="api_key" :init="{
+        <editor v-model='rteInfo' 
+        :api-key="api_key"
+        :init="{
           height: '260px',
           width: '99%',
           menubar: false,
@@ -81,7 +83,7 @@
                 </div>
 
                 <div style="width: 100%;padding-left: 20px;padding-top: 10px;padding-right: 20px;background:#f1f1f1;overflow: hidden;">
-                  <div style="width: 69%;float: left;height: 26px;">{{ item.content }}</div>
+                  <div style="width: 69%;float: left;overflow: hidden;">{{ item.content }}</div>
                   <div style="width: 30%;float: right;height: 26px;text-align: right;">
                     <!-- <button style="width: 60px; color:#FFF;border: 0px;background-color: green;border-radius: 5px;" @click="like_discuss(item)">点赞</button> -->
                     <button style="width: 60px; color:#FFF;border: 0px;background-color: brown;border-radius: 5px;" @click="remove_discuss(item)">删除</button>
@@ -117,17 +119,12 @@
     </Modal>
 
 
-
-
-
-
   </div>
 </template>
 <script>
 
 import Editor from '@tinymce/tinymce-vue';
 import { htmlEncodeByRegExp, htmlDecodeByRegExp ,getTextApiKey} from '../../js/common/utils';
-import { get } from 'core-js/core/dict';
 
 export default {
     components: {

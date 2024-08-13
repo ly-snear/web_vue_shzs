@@ -136,7 +136,7 @@ export default {
               },
               series: [
                 {
-                  name: 'Access From',
+                  name: '',
                   type: 'pie',
                   radius: '70%',
                   data: [],
@@ -165,7 +165,7 @@ export default {
               },
               series: [
                 {
-                  name: 'Access From',
+                  name: '',
                   type: 'pie',
                   radius: '70%',
                   data: [],
@@ -202,7 +202,7 @@ export default {
               },
               series: [
                 {
-                  name: 'Access From',
+                  name: '',
                   type: 'pie',
                   radius: '70%',
                   data: [],

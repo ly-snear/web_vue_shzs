@@ -2,11 +2,12 @@
 
 <template>
     <div class='content' style="margin-left: 8px;">
+      <!-- <remote-script src='tinymce.min.js' @load='initTinymce'></remote-script> -->
       <div style="border: 0px red solid;overflow: hidden;">
         <div class='div-editor' style="width: 100%;">
           <!-- <TinymceEditor :value="content" @input="newContent"></TinymceEditor> -->
-
-          <editor v-model='rteInfo' :api-key="api_key" :init="{
+          <!-- <textarea id='id_rteInfo' v-model='rteInfo'></textarea> -->
+          <editor v-model='rteInfo' :api-key="api_key":init="{
             height: '260px',
             width: '99%',
             menubar: false,
@@ -162,10 +163,18 @@
                 </div>
 
                 <div style="border:0px green solid;width: 100%;padding-left: 20px;padding-top: 10px;padding-right: 20px;background:#f1f1f1;float: left;">
-                  <div style="width: 69%;float: left;height: 26px;">{{ item.content }}</div>
+                  <div style="width: 69%;float: left;overflow: hidden;">{{ item.content }}</div>
                   <div style="width: 30%;float: right;height: 26px;text-align: right;">
-                    <!-- <button style="width: 60px; color:#FFF;border: 0px;background-color: green;border-radius: 5px;" @click="like_discuss(item)">点赞</button> -->
-                    <button style="width: 60px; color:#FFF;border: 0px;background-color: brown;border-radius: 5px;" @click="remove_discuss(item)">删除</button>
+                    <button style="width: 60px; float: right;color:#FFF;border: 0px;background-color: brown;border-radius: 5px;" @click="remove_discuss(item)">删除</button>
+                    <!-- 回复研讨 begin -->
+                    <button style="width: 60px;float: right; color:#FFF;border: 0px;background-color: green;border-radius: 5px;margin-right: 8px;" @click="reply_discuss(item)">回复</button>
+                    <Modal v-model='replyDiscussFrom'>
+                      <div style="width: 400px;">
+                        <textarea style="width: 100%;height: 300px;"  v-model='replyDiscuss_content'></textarea>
+                        <button @click="submit_reply_discuss(item)" style="width: 100px; color:#FFF;border: 0px;background-color: green;border-radius: 5px;height: 30px;float:right;margin-top: 10px;margin-bottom: 10px;" >回复</button>
+                      </div>
+                    </Modal>
+                    <!-- 回复研讨 end -->
                   </div>
                 </div>
 
@@ -186,80 +195,91 @@
   </div>
 </template>
 <script>
-import TinymceEditor from "./../../components/tinymce.vue"
+//import TinymceEditor from "./../../components/tinymce.vue"
 import WebOfficeSDK from './web-office-sdk-solution-v2.0.6.umd.js';
 import Editor from '@tinymce/tinymce-vue';
+//import Editor from './tinymce.min.js';
 import { htmlEncodeByRegExp, htmlDecodeByRegExp,getTextApiKey } from '../../js/common/utils';
  
+//import Editor2 from './tinymce.min.js';
+
 export default {
     components: {
-        'editor': Editor
+        'editor': Editor,
+        //'editor2': Editor2,
+        // 'TinymceEditor':TinymceEditor
     },
     props:[
       'pnp',
       'proj'
     ],
     data() {
-        return {
-          isButtonEnabled:true,
-          //----------------------
-          api_key:"",
-          content: "",
-            
-          fileDialogVisible: false,
-          filename:"+ 推拽文件到此",
-          loading : true,
-          rteInfo:"",
-          rteInfo_title:"",
-          editId_content:0,
-          editId:0,
-          table_data: {
-            pagination: {
-              page: 1,
-              size: 6,
-              total: 0
-            },
-            datas: []
+      return {
+        isButtonEnabled:true,
+        //----------------------
+        api_key:"",
+        content: "",
+          
+        fileDialogVisible: false,
+        filename:"+ 推拽文件到此",
+        loading : true,
+        rteInfo:"",
+        rteInfo_title:"",
+        editId_content:0,
+        editId:0,
+        table_data: {
+          pagination: {
+            page: 1,
+            size: 6,
+            total: 0
           },
-          disabled: false,
-          selectedFile: null,
-          file_detail:{
-            extension:"",
-            name:"",
-            size:0,
-            title:"",
-            url:""
+          datas: []
+        },
+        disabled: false,
+        selectedFile: null,
+        file_detail:{
+          extension:"",
+          name:"",
+          size:0,
+          title:"",
+          url:""
+        },
+        resource_type: {
+          selects: [],
+          now: 0
+        },
+        resource_type_query: {
+          selects: [],
+          now: 0
+        },
+        file: null,
+        fileUrl: null,
+        user_id : 0,
+        user_token:null,
+        addResourceFrom:false,
+        discussResourceFrom:false,
+        discuss_content:"",
+        table_discuss_data: {
+          pagination: {
+            page: 1,
+            size: 6,
+            total: 0
           },
-          resource_type: {
-            selects: [],
-            now: 0
-          },
-          resource_type_query: {
-            selects: [],
-            now: 0
-          },
-          file: null,
-          fileUrl: null,
-          user_id : 0,
-          user_token:null,
-          addResourceFrom:false,
-          discussResourceFrom:false,
-          discuss_content:"",
-          table_discuss_data: {
-            pagination: {
-              page: 1,
-              size: 6,
-              total: 0
-            },
-            datas: []
-          },
-          button_text:"研讨"
+          datas: []
+        },
+        button_text:"研讨",
+        replyDiscussFrom:false,//回复研讨窗体
+        replyDiscuss_content:"",
+        //------------------------------
+        id_rteInfo: 'id_rteInfo',
 
 
 
-        };
+      };
     },
     created() {
+      //this.initTinymce();
+
       this.api_key = getTextApiKey();
       let user = this.$store.getters['user'];
       this.user_id = user.id;
@@ -283,9 +303,62 @@ export default {
       },800);
     },
     mounted(){
-
+      //this.initTinymce();
     },
     methods: {
+      initTinymce() {
+        tinymce.init({
+          selector: '#id_rteInfo',
+          height: '260px',
+            width: '99%',
+            menubar: false,
+            language: 'zh_CN',
+            images_upload_url: 'https://yiqi.nnyun.net/FileAction/UploadTinyMCEFileV2',
+            images_upload_base_path: '',
+            file_picker_callback: function (callback, value, meta) {
+                        let file_type = '.pdf, .txt, .zip, .rar, .7z, .doc, .docx, .xls, .xlsx, .ppt, .pptx, .mp3, .mp4';
+                        let input = document.createElement('input');
+                        input.setAttribute('type', 'file');
+                        input.setAttribute('accept', file_type);
+                        input.click();
+                        input.onchange = function () {
+                            let file = this.files[0];
+                            let xhr, formData;
+                            xhr = new XMLHttpRequest();
+                            xhr.withCredentials = false;
+                            xhr.open('POST', 'https://yiqi.nnyun.net/FileAction/UploadTinyMCEFileV2');
+                            xhr.onload = function () {
+                                let json;
+                                if (xhr.status != 200) {
+                                    failure('HTTP Error: ' + xhr.status);
+                                    return;
+                                }
+                                json = JSON.parse(xhr.responseText);
+                                if (!json || typeof json.location != 'string') {
+                                    failure('Invalid JSON: ' + xhr.responseText);
+                                    return;
+                                }
+                                callback(json.location, {text: file.name});
+                            };
+                            formData = new FormData();
+                            formData.append('file', file, file.name);
+                            xhr.send(formData);
+                        };
+                    },
+            plugins: [
+              'advlist table autolink lists link image emoticons charmap print preview anchor',
+              'searchreplace visualblocks code fullscreen',
+              'insertdatetime media table paste code help wordcount searchreplace'
+            ],
+            toolbar:
+              'undo redo | formatselect | bold italic forecolor backcolor | \
+              alignleft aligncenter alignright alignjustify | \
+              bullist numlist outdent indent | table link image emoticons | searchreplace | removeformat'
+          
+        });
+      },
+      //-----------------------------------------------------
+      //-----------------------------------------------------
       getPrepareState(){
         this.loading = true;
         Ajax.get("/prepare/get?id="+this.pnp.id, null).then((resp) => {
@@ -563,11 +636,18 @@ export default {
             let list = resp.body.data.slice(idx * 6, (idx + 1) * 6);
             this.table_discuss_data.datas = list;
             this.table_discuss_data.pagination.total = resp.body.data.length;
-            console.log(this.table_discuss_data.datas);
+            console.log("列表数据");
+            console.log(resp.body.data);
           }
         });
       },
       submit_discuss_data(){
+        if(this.editId_content == 0){
+          HeyUI.$Message.error("研讨内容编号不存在！");
+          this.discussResourceFrom = false;
+          this.this.discuss_content = "";
+          return;
+        }
         let content = '';
         if (this.discuss_content && this.discuss_content.length > 0) {
           content = htmlEncodeByRegExp(this.discuss_content);
@@ -633,6 +713,44 @@ export default {
               HeyUI.$Message.error(resp.msg);
             }
           });
+        });
+      },
+      //研讨-回复
+      reply_discuss(){
+        this.replyDiscussFrom = true;
+      },
+      //研讨-提交
+      submit_reply_discuss(item){
+        // if(this.editId_content == 0){
+        //   HeyUI.$Message.error("研讨内容编号不存在！");
+        //   this.discussResourceFrom = false;
+        //   this.this.discuss_content = "";
+        //   return;
+        // }
+        let param = {
+          "id":0,                                                   //备课项目内容研讨ID 新增时为0 编辑时为编辑的研讨ID 必须提交
+          "pid":item.id,                                                  //上级研讨ID 可选参数 默认0 表示顶级研讨
+          "content":this.replyDiscuss_content,                                        //研讨内容 必须提交 html内容需要编码
+          "praise":0,                                               //点赞数量 可选参数 默认0
+          "share":0,                                                //分享数量 可选参数 默认0
+          "favorite":0,                                             //收藏数量 可选参数 默认0
+          "reply":0,                                                //研讨数量 可选参数 默认0
+          "substance":this.editId_content                                   //备课项目内容ID id=0 或者 pid=0时必须提交 pid>0为可选参数
+        };
+        console.log(param);
+        return;
+        if(this.replyDiscuss_content == ""){
+          HeyUI.$Message.error("研讨内容不允许为空！");
+          return;
+        }
+        Ajax.postJson("/prepare/content/reply/save", param).then((resp) => {
+          if (resp.ok) {
+            HeyUI.$Message.success("保存成功！");
+            this.init_discuss_data();
+            this.replyDiscuss_content = "";
+          }
+        }).catch(ex => {
+          HeyUI.$Message.error(ex);
         });
       },
       clear_discuss_from(){

@@ -43,7 +43,6 @@
           <Row :space-x="0" type="flex" style="border:0px red solid;overflow: hidden;">
             <!--左侧-->
             <div style="width: 210px;">
-              <!-- <div style="width: 200px;height: 200px;border:0px green solid;float: left;margin-bottom: 8px;border-radius: 3px;background-color: rgb(194 217 193);"> -->
               <div style="width: 200px;height: 200px;float: left;margin-bottom: 8px;border-radius: 8px;border: 1px #72cd72 solid;position: relative;background-color: rgb(241, 241, 241);">
                 <Avatar :src="teacher_detail.cover" style="margin: 5px;" :width="100" :imageTop="8">
                   <p style="font-size: 18px;margin-top: 18px;color: darkgreen;position: absolute;left: 100px;top: -10px;">{{teacher_detail.name}}&nbsp;&nbsp;{{teacher_detail.course}}</p>
@@ -69,17 +68,36 @@
                   <button class="h-btn h-btn-yellow" style="width: 100%;height: 40px;font-size: 16px;border-left: 10px #eb9e0f solid;color: #FFFFFF;" :style="{ backgroundColor: buttonColorGive }" @click="onGive">我点赞的</button>
                 </div>
               </div>
-
+              
+              <!-- 推荐 -->
               <div style="width: 200px;border:0px green solid;float: left;margin-bottom: 8px;border-radius: 3px;overflow: hidden;">
+                <div style="width: 200px;overflow: hidden;background-color: #ecf8fb;">
+                  <img src="./../../images/recommend.png" style="height: 50px;float: left;"/>
+                  <div style="float: right;line-height: 50px;font-size: 24px;margin-right: 8px;color: #70B603;font-family:Arial Normal, Arial, sans-serif;">推荐</div>
+                </div>
                 <div v-for="(item, index) in table_recommend.datas" :key="index"
-                  style="width: 200px;height: 200px;border:0px green solid;float: left;margin-bottom: 8px;border-radius: 3px;background-color: rgb(156 165 164);padding-top: 3px;">
+                  style="width: 200px;border:0px green solid;float: left;margin-bottom: 8px;border-radius: 3px;background-color: #ecf8fb;">
                   <div style="border:0px green solid;text-align: center;width: 100%;height: 49%;">
-                    <img class="icon-x" style="border-radius: 8px;width: 96%;height: 100%;padding: 2px;" :src="item.cover" @error="handleImageError" />
+                    <img class="icon-x" style="border-radius: 8px;width: 190px;height: 115px;padding: 2px;" :src="item.cover" @error="handleImageError" />
                   </div>
-                  <div style="border:0px green solid;"><p class="dark2-color" style="text-align: center;margin-top: 1px;font-size: 18px;font-family:'微软雅黑';color: #ffffff !important;">{{ item.subject }}</p></div>
-                  <div style="border:0px green solid;padding-left: 10px;color: #ffffff;">主备:{{ item.name }}</div>
-                  <div style="border:0px green solid;padding-left: 10px;color: #ffffff;">协备：{{ item.teachers_count }}人</div>
-                  <div style="border:0px green solid;padding-left: 10px;color: #ffffff;">{{ item.time }}</div>
+                  <div style="border:0px green solid;"><p class="dark2-color" style="text-align: center;margin-top: 1px;font-size: 18px;font-family:'微软雅黑';color: #70B603 !important;"><a @click='showTpoPage(item)'>{{ item.subject }}</a></p></div>
+                  <div style="border:0px green solid;padding-left: 10px;color: #70B603;float: left;width: 100%;"><p style="float: left;">主备:</p><p style="color:blueviolet;float: left;">{{ item.name }}</p></div>
+                  <!-- <div style="border:0px green solid;padding-left: 10px;color: #70B603;float: left;width: 100%;">协备：{{ item.teachers_count }}人</div> -->
+                  <div v-if="item.teachers_count > 0">
+                    <Tooltip theme="white" className="tooltip5-demo" placement="bottom-start" style="margin-top: 8px;" >
+                      <span class="text-hover">协备：{{item.teachers_count}}人</span>
+                      <div slot="content">
+                        <Table :datas="item.teachers">
+                          <TableItem title="教师" prop="name" :width="100"></TableItem>
+                          <TableItem title="学校" prop="school" :width="160"></TableItem>
+                        </Table>
+                      </div>
+                    </Tooltip>
+                  </div>
+                  <div v-else style="padding-left: 10px;color: #70B603;">
+                    <p>协备：{{item.teachers_count}}人</p>
+                  </div>
+                  <div style="border:0px green solid;padding-left: 10px;color: #70B603;float: left;width: 100%;">{{ item.time }}</div>
                 </div>
               </div>
 
@@ -200,7 +218,20 @@
                           <p>主备：{{ item.teacher_name }}</p>
                         </div>
                         <div style="width: 50%;height:34px;float: left;margin-bottom: 10px;background-color: #FFF;">
-                          <p>协备：{{item.teachers_count}}人</p>
+                          <div v-if="item.teachers_count > 0">
+                            <Tooltip theme="white" className="tooltip5-demo" placement="bottom-start" style="margin-top: 8px;" >
+                              <span class="text-hover">协备：{{item.teachers_count}}人</span>
+                              <div slot="content">
+                                <Table :datas="item.teachers">
+                                  <TableItem title="教师" prop="name" :width="100"></TableItem>
+                                  <TableItem title="学校" prop="school" :width="160"></TableItem>
+                                </Table>
+                              </div>
+                            </Tooltip>
+                          </div>
+                          <div v-else>
+                            <p>协备：{{item.teachers_count}}人</p>
+                          </div>
                         </div>
                         <div style="width: 100%;float: left;background-color: #FFF;">
                           <Row :space-x="19" :space-y="5" style="border:0px solid green;margin: 5px;padding-top: 5PX;">
@@ -208,7 +239,6 @@
                             <Cell :width='6'><Badge :count="item.favorite" :max-count="99"><img class="icon-x" src="../../images/collection.png"/></Badge></Cell>
                             <Cell :width='6'><Badge :count="item.reply" :max-count="99"><img class="icon-x" src="../../images/chat.png"/></Badge></Cell>
                             <Cell :width='6'><Badge :count="item.praise" :max-count="99"><img class="icon-x" src="../../images/like.png"/></Badge></Cell>
-                            <!-- <Cell :width='5'><Badge :count="item." :max-count="99"><img class="icon-x" src="../../images/see.png"/></Badge></Cell> -->
                           </Row>
                         </div>
                         <div style="width: 100%;height:23px;float: left;">
@@ -480,6 +510,7 @@
             </Button>
         </div> -->
       </Modal>
+
     </div>
   </template>
 
@@ -790,6 +821,15 @@ export default {
         //详情页面协备教师字符串
         teachers_string:"",
         teachers_count:0,
+
+        table_teachers_list: {
+          pagination: {
+            page: 1,
+            size: 10,
+            total: 0
+          },
+          datas: []
+        },
 
 
 
@@ -1208,6 +1248,8 @@ export default {
         this.addForm.reply=0,
         this.addForm.finish_time="";
         this.addForm.teachers=[];
+
+        this.table_teachers_selected.datas = [];
       },
       //学段
       init_stage_list(){
@@ -1295,7 +1337,6 @@ export default {
           console.log(getApiURL()+'/wx/qrcode/login/v2?key='+this.authorization_key);
           const response = axios.get(getApiURL()+'/wx/qrcode/login/v2?key='+this.authorization_key).then(response => {
             this.data = response.data;
-            console.log(this.data);
             if(this.data.code == 4){
               if (!this.data.user.token) return;
               if (!this.data.user.avatar || this.data.user.avatar.length == 0) {
@@ -1303,8 +1344,13 @@ export default {
               }
               G.set('user', this.data.user);
               this.$store.commit('setUser', this.data.user);
+              this.addTeacher(this.data);
               this.$router.go(0);
               window.clearInterval(this.go);
+              
+            }else{
+              console.log('扫码返回的code不等于4');
+              console.log(this.data);
             }
           })
           .catch(error => {
@@ -1314,9 +1360,25 @@ export default {
           console.log('Error:', error);
         }
       },
+      addTeacher(data){
+        if(this.$route.query.id==undefined){
+          HeyUI.$Message.error('备课地址不正确！');
+          return
+        }
+        let param={};
+        param = {
+          id : this.$route.query.id,
+          teacher:data.user.id
+        };
+        console.log(param);
+        Ajax.post('/prepare/assist/wx/add', param).then((resp) => {
+          console.log('扫码添加协备教师')
+          console.log(resp)
+        });
+      },
       //选择协助备课教师
       selectAssistLessonPreparationTeachers(){
-        this.table_teachers_selected.datas = [];
+        // this.table_teachers_selected.datas = [];
         this.table_teachers.datas = [];
         this.table_teachers.pagination.page = 1;
         this.table_teachers.pagination.size = 10;

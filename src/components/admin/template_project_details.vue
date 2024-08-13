@@ -39,7 +39,6 @@
 </style>
     <template>
         <div class="app-container" style="border: 0px red solid;margin-top: 20px;">
-            <!-- <Tabs :datas="this.form_param.datas" class-name="h-tabs-card" v-model="selected" @change="change"></Tabs> -->
             <div style="margin-bottom: 8px;">
                 <div style="height:180px;border: 0px red solid;width: 27.5%;float: left;overflow: hidden;">
                     <img :src="prepare_detail.cover" style="width: 100%;height: 100%;border-radius: 5px;"/>
@@ -49,9 +48,23 @@
                         <div style="float: left;border: 0px red solid;font-size: 24px;color: darkgreen;font-weight: bold;">{{ prepare_detail.subject }}</div>
                         <div style="float: left;padding: 0px 5px 0px 5px; border: 0px red solid;margin-left: 8px;font-size: 20px;background-color:khaki;color: darkgreen;border-radius: 5px;">{{ prepare_detail.state_title }}</div>
                         <div style="float: left;border: 0px red solid;margin-left: 8px;height: 36px;">
-                            <img src="../../images/share.png" style="width: 36px;height: 36px;border-radius: 5px;cursor: pointer;" @click="submitShare" />
-                            <img src="../../images/collection.png" style="width: 36px;height: 36px;border-radius: 5px;cursor: pointer;" @click="submitCollection"/>
-                            <img src="../../images/like.png" style="width: 36px;height: 36px;border-radius: 5px;cursor: pointer;" @click="submitGive"/>
+                            <div style="float: left;margin-right: 8px;">
+                                <img src="../../images/share.png" style="width: 36px;height: 36px;border-radius: 5px;cursor: pointer;" @click="submitShare" />
+                            </div>
+                            <!-- 收藏 -->
+                            <div v-if="prepare_detail.is_favorite" style="float: left;margin-right: 8px;">
+                                <img src="../../images/collection_no.png" style="width: 36px;height: 36px;border-radius: 5px;cursor: pointer;" />
+                            </div>
+                            <div v-else style="float: left;margin-right: 8px;">
+                                <img src="../../images/collection.png" style="width: 36px;height: 36px;border-radius: 5px;cursor: pointer;" @click="submitCollection"/>
+                            </div>
+                            <!-- 点赞 -->
+                            <div v-if="prepare_detail.is_praise" style="float: left;">
+                                <img src="../../images/like_no.png" style="width: 36px;height: 36px;border-radius: 5px;cursor: pointer;" />
+                            </div>
+                            <div v-else style="float: left;">
+                                <img src="../../images/like.png" style="width: 36px;height: 36px;border-radius: 5px;cursor: pointer;" @click="submitGive"/>
+                            </div>
                         </div>
                     </div>
 
@@ -266,7 +279,8 @@
                     teachers: [],
                     teachers_string:"",
                     teachers_count:0,
-
+                    is_favorite:false,
+                    is_praise:false,
                 },
                 //详情页面协备教师字符串
                 
@@ -307,17 +321,26 @@
                 width: 100,
                 margin: 1
                 }, (error, canvas) => {
-                if (error) {
-                    console.error(error)
-                    return
-                }
-                this.$refs.canvasWrapper.appendChild(canvas)
+                    if (error) {
+                        console.error(error)
+                        return
+                    }
+                    this.$refs.canvasWrapper.appendChild(canvas)
                 })
             },
             getPrepareDetail(prepareId){
                 Ajax.get("/prepare/get?id="+prepareId, null).then((resp) => {
                     this.loading = false;
                     if (resp.ok) {
+                        console.log(resp)
+                        //收藏
+                        if(resp.body.is_favorite>0){
+                            this.prepare_detail.is_favorite=true;
+                        }
+                        //点赞
+                        if(resp.body.is_praise>0){
+                            this.prepare_detail.is_praise=true;
+                        }
                         this.prepare_detail.type= resp.body.type;
                         this.prepare_detail.subject= resp.body.subject;
                         this.prepare_detail.team_type= resp.body.team_type;
@@ -492,6 +515,7 @@
                 Ajax.postJson('/prepare/favorite', "id="+this.lessonPreparationId).then((resp) => {
                     if (resp.ok) {
                         HeyUI.$Message.success('已收藏');
+                        this.prepare_detail.is_favorite=true;
                     }else{
                         HeyUI.$Message.error(resp.msg);
                     }
@@ -502,6 +526,7 @@
                 Ajax.postJson('/prepare/praise', "id="+this.lessonPreparationId).then((resp) => {
                     if (resp.ok) {
                         HeyUI.$Message.success('已点赞');
+                        this.prepare_detail.is_praise = true;
                     }else{
                         HeyUI.$Message.error(resp.msg);
                     }
