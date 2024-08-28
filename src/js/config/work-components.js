@@ -102,6 +102,12 @@ export default [
     meta: { title: '备课管理', icon: 'icon-users' }
   },
   {
+    path: '/admin/notice',
+    name: 'AdminNotice',
+    component: (resolve) => require(['components/admin/notice'], resolve),
+    meta: { title: '通知管理', icon: 'icon-users' }
+  },
+  {
     path: '/lesson/group',
     name: 'LessonGroup',
     component: (resolve) => require(['components/lesson/group'], resolve),

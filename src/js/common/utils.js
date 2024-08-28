@@ -400,6 +400,15 @@ export function filterSize(size) {
   return (size / pow1024(4)).toFixed(2) + ' TB';
 }
 
+export function validateUrl(url){
+  const myreg = /http(s)?:\/\/([\w-]+\.)+[\w-]+(\/[\w- ./?%&=]*)?/;
+  if (!myreg.test(url)) {
+    return false;
+  } else {
+    return true;
+  }
+};
+
 export function getApiURL() {
   //let url = 'http://192.168.110.127/api';
   //let url = 'http://222.128.67.163:8866/api';
@@ -407,6 +416,8 @@ export function getApiURL() {
 
   let url = 'http://dev.nnyun.net:80/api';
   //let url = 'http://yiqi.nnyun.net:80/api';
+  //let url = 'http://album.nnyun.net:8866/api';
+  
   return url;
 }
 

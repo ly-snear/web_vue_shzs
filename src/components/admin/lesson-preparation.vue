@@ -32,21 +32,13 @@
 <template>
     <div class='frame-page'>
       <div class='h-panel'>
-        <!--<div class='h-panel-bar filter'>
-           <Breadcrumb :datas='bread' @click='click'></Breadcrumb>
-        </div> -->
         <div class='h-panel-body'>
-          <!-- <Row :space="10">
-            <Cell :xs='24' :sm='12' :md='8' :lg='4' :xl='2'><div>123</div></Cell>
-          </Row> -->
-
           <Row :space-x="0" type="flex" style="border:0px red solid;overflow: hidden;">
             <!--左侧-->
             <div style="width: 210px;">
               <div style="width: 200px;height: 200px;float: left;margin-bottom: 8px;border-radius: 8px;border: 1px #72cd72 solid;position: relative;background-color: rgb(241, 241, 241);">
                 <Avatar :src="teacher_detail.cover" style="margin: 5px;" :width="100" :imageTop="8">
                   <p style="font-size: 18px;margin-top: 18px;color: darkgreen;position: absolute;left: 100px;top: -10px;">{{teacher_detail.name}}&nbsp;&nbsp;{{teacher_detail.course}}</p>
-                  <!-- <p class="dark2-color" style="position: absolute;top:100px;">{{teacher_detail.course}}</p> -->
                 </Avatar>
                 <p style="text-align: center;margin-top: 40px;font-size: 20px;font-weight: bold;color: green;font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;">{{teacher_detail.school}}</p>
               </div>
@@ -82,7 +74,6 @@
                   </div>
                   <div style="border:0px green solid;"><p class="dark2-color" style="text-align: center;margin-top: 1px;font-size: 18px;font-family:'微软雅黑';color: #70B603 !important;"><a @click='showTpoPage(item)'>{{ item.subject }}</a></p></div>
                   <div style="border:0px green solid;padding-left: 10px;color: #70B603;float: left;width: 100%;"><p style="float: left;">主备:</p><p style="color:blueviolet;float: left;">{{ item.name }}</p></div>
-                  <!-- <div style="border:0px green solid;padding-left: 10px;color: #70B603;float: left;width: 100%;">协备：{{ item.teachers_count }}人</div> -->
                   <div v-if="item.teachers_count > 0">
                     <Tooltip theme="white" className="tooltip5-demo" placement="bottom-start" style="margin-top: 8px;" >
                       <span class="text-hover">协备：{{item.teachers_count}}人</span>
@@ -149,9 +140,6 @@
                       @change='changeQueryTerm'
                       ></Select>
                 </Cell>
-                <!-- <Cell :width='4'>
-                  <Select placeholder='选择课程' ></Select>
-                </Cell> -->
                 <Cell :width='4'>
                   <Select v-model='textbook_main.now' 
                   :datas="textbook_main.selects" 
@@ -352,9 +340,6 @@
 
                 </div>
                 <div style="border: 0px green solid;height: 39px;">
-                  <!-- <FormItem label='课程' prop='course'>
-                    <input type='text' v-model="addForm.course" placeholder='请输入课程名称' />
-                  </FormItem> -->
                 </div>
 
                 <div style="border: 0px green solid;height: 50px;padding-bottom: 20px;line-height: 50px;padding-left: 80px;">
@@ -1378,7 +1363,6 @@ export default {
       },
       //选择协助备课教师
       selectAssistLessonPreparationTeachers(){
-        // this.table_teachers_selected.datas = [];
         this.table_teachers.datas = [];
         this.table_teachers.pagination.page = 1;
         this.table_teachers.pagination.size = 10;

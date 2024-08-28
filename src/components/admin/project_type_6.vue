@@ -23,8 +23,6 @@
 <script>
 
 import Editor from '@tinymce/tinymce-vue';
-import { htmlEncodeByRegExp, htmlDecodeByRegExp } from '../../js/common/utils';
-
 export default {
     components: {
         'editor': Editor
@@ -54,9 +52,7 @@ export default {
       console.log(this.pnp.project)
       this.init_data();
     },
-    mounted(){
-
-    },
+    mounted(){},
     methods: {
         //获取操作记录列表(record,'01_备课记录列表',prepare/record/list)
         init_data(){
@@ -92,14 +88,6 @@ export default {
         handleSelectionChange(){
 
         },
-
-
-
-
-
-
-
-
     },
 }
 </script>

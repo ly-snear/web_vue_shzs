@@ -205,9 +205,7 @@ import { htmlEncodeByRegExp, htmlDecodeByRegExp,getTextApiKey } from '../../js/c
 
 export default {
     components: {
-        'editor': Editor,
-        //'editor2': Editor2,
-        // 'TinymceEditor':TinymceEditor
+        'editor': Editor
     },
     props:[
       'pnp',
@@ -216,10 +214,8 @@ export default {
     data() {
       return {
         isButtonEnabled:true,
-        //----------------------
         api_key:"",
         content: "",
-          
         fileDialogVisible: false,
         filename:"+ 推拽文件到此",
         loading : true,
@@ -270,32 +266,22 @@ export default {
         button_text:"研讨",
         replyDiscussFrom:false,//回复研讨窗体
         replyDiscuss_content:"",
-        //------------------------------
         id_rteInfo: 'id_rteInfo',
-
-
-
       };
     },
     created() {
-      //this.initTinymce();
-
       this.api_key = getTextApiKey();
       let user = this.$store.getters['user'];
       this.user_id = user.id;
       this.user_token = user.token;
-      //---------------------------------------------------
       if(this.pnp.project !== undefined && this.pnp.project !== null){
-        
       }else{
         this.pnp.project = this.proj;
       }
       this.rteInfo = "";
       this.rteInfo_title = "";
-
       this.getContentInfo();
       this.getPrepareState();
-
       setTimeout(()=>{
         this.init_data();
         this.resource_type = this.init_resource_type();
@@ -303,7 +289,6 @@ export default {
       },800);
     },
     mounted(){
-      //this.initTinymce();
     },
     methods: {
       initTinymce() {
@@ -357,8 +342,6 @@ export default {
           
         });
       },
-      //-----------------------------------------------------
-      //-----------------------------------------------------
       getPrepareState(){
         this.loading = true;
         Ajax.get("/prepare/get?id="+this.pnp.id, null).then((resp) => {
@@ -429,7 +412,6 @@ export default {
         };
         this.loading = true;
         Ajax.postJson(url, param).then((resp) => {
-          console.log(resp.body);
           this.loading = false;
           if (resp.ok) {
             this.setTable(resp.body);
@@ -443,12 +425,8 @@ export default {
         this.table_data.datas = list;
         this.table_data.pagination.total = body.length;
       },
-      onSelect(){
-
-      },
-      handleSelectionChange(){
-
-      },
+      onSelect(){},
+      handleSelectionChange(){},
       init_resource_type(){
         let now = 0;
         let selects = [];
@@ -534,8 +512,6 @@ export default {
           url: this.file_detail.url,                                              //资源地址 必须提交
           extension: this.file_detail.extension,                                  //资源扩展文件名称 可选参数
           isedit: 1,                                                              //资源是否可以编辑 1:允许 0:禁止 可选参数
-          //"edits": 0,                                                           //资源编辑次数 可选参数
-          //"version": "第一稿",                                                   //资源版本 可选参数
           size: this.file_detail.size,                                            //资源文件大小 计量单位字节 可选参数
           isdownload: 0,                                                          //资源是否允许下载 1:允许 0:禁止 可选参数
           downloads: 0,                                                           //资源下载次数 可选参数
@@ -544,11 +520,9 @@ export default {
           share: 0,                                                               //资源分享次数 可选参数
           favorite: 0,                                                            //资源收藏次数 可选参数
           reply: 0                                                                //资源研讨次数 可选参数
-          //"serial": "9cae74b9-1f2c-11ef-918e-00ff1bb61503"                      //资源序号 可选参数
         };
         Ajax.postJson("/prepare/resource/save", param).then((resp) => {
           if (resp.ok) {
-            console.log(resp);
             HeyUI.$Message.success("保存成功！");
             this.init_data();
           }
@@ -616,7 +590,6 @@ export default {
           "substance":this.editId_content,                                     //备课项目内容ID 必须提交 以下的参数都是可选的
           "pid":0,                                           //研讨ID
           "content":"",                                      //研讨内容
-          //"user":this.user_id,                                         //发表研讨内容的用户ID
           "user_name":"",                                    //发表研讨内容的用户姓名
           "min_praise":-1,                                   //被点赞的最小数量
           "max_praise":100,                                  //被点赞的最大数量
@@ -627,7 +600,6 @@ export default {
           "size":0,                                           //分页尺寸
           "page":0                                            //分页页码
         };
-        console.log(this.editId_content)
         this.loading = true;
         Ajax.postJson(url, param).then((resp) => {
           this.loading = false;
@@ -636,8 +608,6 @@ export default {
             let list = resp.body.data.slice(idx * 6, (idx + 1) * 6);
             this.table_discuss_data.datas = list;
             this.table_discuss_data.pagination.total = resp.body.data.length;
-            console.log("列表数据");
-            console.log(resp.body.data);
           }
         });
       },
@@ -662,7 +632,6 @@ export default {
           "reply":0,                                                //研讨数量 可选参数 默认0
           "substance":this.editId_content                                   //备课项目内容ID id=0 或者 pid=0时必须提交 pid>0为可选参数
         };
-        console.log(param);
         if(this.discuss_content == ""){
           HeyUI.$Message.error("研讨内容不允许为空！");
           return;
@@ -698,7 +667,6 @@ export default {
           HeyUI.$Message.error('当前备课已结束，不允许本操作！');
           return;
         }
-
         Utils.confirm(this, '确定删除该记录 ？', (modal) => {
           modal.close();
           let param={};
@@ -721,12 +689,6 @@ export default {
       },
       //研讨-提交
       submit_reply_discuss(item){
-        // if(this.editId_content == 0){
-        //   HeyUI.$Message.error("研讨内容编号不存在！");
-        //   this.discussResourceFrom = false;
-        //   this.this.discuss_content = "";
-        //   return;
-        // }
         let param = {
           "id":0,                                                   //备课项目内容研讨ID 新增时为0 编辑时为编辑的研讨ID 必须提交
           "pid":item.id,                                                  //上级研讨ID 可选参数 默认0 表示顶级研讨
@@ -737,8 +699,6 @@ export default {
           "reply":0,                                                //研讨数量 可选参数 默认0
           "substance":this.editId_content                                   //备课项目内容ID id=0 或者 pid=0时必须提交 pid>0为可选参数
         };
-        console.log(param);
-        return;
         if(this.replyDiscuss_content == ""){
           HeyUI.$Message.error("研讨内容不允许为空！");
           return;

@@ -43,16 +43,13 @@
       <div>•&nbsp;访问次数</div>
     </div>
 
-    <div style="height: 300px;">
+    <div style="height: 300px;" v-show="disabled1">
       <div id='Chart_CountDiscussWords' style='width: 600px; height: 300px;float: left;'></div>
       <div id='Chart_CountDiscussTimes' style='width: 600px; height: 300px;float: left;'></div>
     </div>
 
-    <div style="height: 300px;">
+    <div style="height: 300px;" v-show="disabled2">
       <div id='Chart_CountDiscussTeachers' style='width: 600px; height: 300px;'></div>
-    </div>
-
-    <div>
     </div>
 
     <div class="divS">
@@ -93,9 +90,7 @@
 </template>
 <script>
 
-import store, { getInitUser } from '../../js/vuex/store';
 import * as echarts from 'echarts';
-
 export default {
     props:['pnp','proj'],
     data() {
@@ -110,7 +105,8 @@ export default {
               },
               datas: []
             },
-            disabled: false,
+            disabled1: false,
+            disabled2: false,
             statistical:{
               resource:0,
               manuscript:0,//稿件
@@ -224,8 +220,6 @@ export default {
                 }
               ]
             },
-
-
         };
     },
     created() {
@@ -238,7 +232,6 @@ export default {
       this.getCountDiscussTeachers();
     },
     methods: {
-      //prepare,'14_备课统计总览',/prepare/count?id=37
       init_prepare_count_data(){
         let url = '/prepare/count?id='+this.pnp.id;
         this.loading = true;
@@ -261,7 +254,6 @@ export default {
       handleSelectionChange(){
 
       },
-      //prepare,'15_备课研讨字数统计',prepare/count/discuss/words?id=4
       getCountDiscussWords(){
         let Chart_CountDiscussWords = echarts.init(document.getElementById('Chart_CountDiscussWords'));
         let url = '/prepare/count/discuss/words?id='+this.pnp.id;
@@ -281,11 +273,14 @@ export default {
         })
         setTimeout(()=>{
           if(this.option_CountDiscussWords.series[0].data.length>0){
+            this.disabled1 = true;
             Chart_CountDiscussWords.setOption(this.option_CountDiscussWords)
           }  
+          else{
+            this.disabled1 = false;
+          }
         },1000);
       },
-      //prepare,'16_备课研讨次数统计',prepare/count/discuss/times?id=4
       getCountDiscussTimes(){
         let Chart_CountDiscussTimes = echarts.init(document.getElementById('Chart_CountDiscussTimes'));
         let url = '/prepare/count/discuss/times?id='+this.pnp.id;
@@ -305,11 +300,14 @@ export default {
         })
         setTimeout(()=>{
           if(this.option_CountDiscussTimes.series[0].data.length>0){
+            this.disabled1 = true;
             Chart_CountDiscussTimes.setOption(this.option_CountDiscussTimes);
           }  
+          else{
+            this.disabled1 = false;
+          }
         },1000);
       },
-      //prepare,'17_备课教师研讨统计',prepare/count/discuss/teachers?id=4
       getCountDiscussTeachers(){
         let Chart_CountDiscussTeachers = echarts.init(document.getElementById('Chart_CountDiscussTeachers'));
         let url = '/prepare/count/discuss/teachers?id='+this.pnp.id;
@@ -331,16 +329,13 @@ export default {
           } 
         })
         setTimeout(()=>{
-          console.log(123);
           if(this.option_CountDiscussTeachers.series[0].data.length>0){
-            console.log(this.Chart_CountDiscussTeachers);
+            this.disabled2 = true;
             Chart_CountDiscussTeachers.setOption(this.option_CountDiscussTeachers);
-          }  
+          }else{
+            this.disabled2 = false;
+          }
         },1000);
-      },
-      //prepare,'18_备课教师详情分页列表',prepare/teacher/page?id=4&size=3&page=2
-      getCountDiscussTeacherPage(){
-        
       },
       init_prepare_data(){
         let url = '/prepare/teacher/page?id=37&size=3&page=1';
@@ -358,10 +353,7 @@ export default {
         let list = body.data.slice(idx * 20, (idx + 1) * 20);
         this.table_data.datas = list;
         this.table_data.pagination.total = body.data.length;
-      },
-
-
-
+      }
     },
 }
 </script>

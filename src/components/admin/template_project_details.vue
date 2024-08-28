@@ -282,10 +282,6 @@
                     is_favorite:false,
                     is_praise:false,
                 },
-                //详情页面协备教师字符串
-                
-
-
             };
         },
         created() {
@@ -394,15 +390,6 @@
                 })
             },
             filteredList() {
-                /*1: '助学资料',
-                    2: '教案',
-                    3: '（导）学案',
-                    4: '备课成果',
-                    5: '教研研讨',
-                    6: '教学反思',
-                    7: '操作记录',
-                    8: '访问记录',
-                    9: '数据分析'*/
                 this.loading = true;
                 let url = '/prepare/get/project?id='+ this.lessonPreparationId +'&pid=0&prg=' + this.selected;
                 Ajax.get(url, null).then((resp) => {
@@ -473,7 +460,6 @@
             //分享
             submitShare(){
                 Ajax.postJson("/prepare/share", "id="+this.lessonPreparationId).then((resp) => {
-                    console.log(resp)
                     if(resp.ok){
                         if (navigator.share) {
                             navigator.share({

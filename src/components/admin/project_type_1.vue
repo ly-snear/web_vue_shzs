@@ -85,7 +85,6 @@
                 <div style="width: 100%;padding-left: 20px;padding-top: 10px;padding-right: 20px;background:#f1f1f1;overflow: hidden;">
                   <div style="width: 69%;float: left;overflow: hidden;">{{ item.content }}</div>
                   <div style="width: 30%;float: right;height: 26px;text-align: right;">
-                    <!-- <button style="width: 60px; color:#FFF;border: 0px;background-color: green;border-radius: 5px;" @click="like_discuss(item)">点赞</button> -->
                     <button style="width: 60px; color:#FFF;border: 0px;background-color: brown;border-radius: 5px;" @click="remove_discuss(item)">删除</button>
                   </div>
                 </div>
@@ -134,7 +133,6 @@ export default {
     data() {
         return {
           isButtonEnabled:true,
-          //----------------------
           api_key:"",
           loading : true,
           rteInfo:" ",
@@ -213,13 +211,11 @@ export default {
                 favorite:0,
                 reply:0,
             };
-            console.log(param);
             if(this.rteInfo == ""){
                 this.$Message.error("内容不允许为空！");
                 return;
             }
             Ajax.postJson("/prepare/content/save", param).then((resp) => {
-              console.log(resp);
               if (resp.ok) {
                 this.editId = resp.body.id;
                 HeyUI.$Message.success("保存成功！");
@@ -245,7 +241,6 @@ export default {
             "substance":this.editId,                                     //备课项目内容ID 必须提交 以下的参数都是可选的
             "pid":0,                                           //研讨ID
             "content":"",                                      //研讨内容
-            //"user":this.user_id,                                         //发表研讨内容的用户ID
             "user_name":"",                                    //发表研讨内容的用户姓名
             "min_praise":-1,                                   //被点赞的最小数量
             "max_praise":100,                                  //被点赞的最大数量
@@ -264,7 +259,6 @@ export default {
               let list = resp.body.data.slice(idx * 10, (idx + 1) * 10);
               this.table_discuss_data.datas = list;
               this.table_discuss_data.pagination.total = resp.body.data.length;
-              console.log(this.table_discuss_data.datas);
             }
           });
         },

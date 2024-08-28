@@ -4,6 +4,30 @@ const fullMenus = [
     key: 'Private',
     icon: 'icon-monitor'
   },
+  //备课管理
+  {
+    title: '备课',
+    key: 'PrepareIndex',
+    icon: 'icon-monitor',
+    level: (role) => role == 10000 || role == 100,
+    children: [
+      {
+        title: '项目管理',
+        icon: 'h-icon-home',
+        key: 'AdminProject'
+      },
+      {
+        title: '模板管理',
+        icon: 'h-icon-home',
+        key: 'AdminTemplate'
+      },
+      {
+        title: '备课管理',
+        icon: 'h-icon-home',
+        key: 'AdminLesson-Preparation'
+      },
+    ]
+  },
   {
     title: '资源库',
     key: 'Shared',
@@ -78,23 +102,29 @@ const fullMenus = [
     level: (role) => role == 10000 || role == 100
   },
   {
-    title: '项目管理',
-    key: 'AdminProject',
+    title: '通知管理',
+    key: 'AdminNotice',
     icon: 'h-icon-home',
     level: (role) => role == 10000 || role == 100
   },
-  {
-    title: '模板管理',
-    key: 'AdminTemplate',
-    icon: 'h-icon-home',
-    level: (role) => role == 10000 || role == 100
-  },
-  {
-    title: '备课管理',
-    key: 'AdminLesson-Preparation',
-    icon: 'h-icon-home',
-    level: (role) => role == 10000 || role == 100
-  },
+  // {
+  //   title: '项目管理',
+  //   key: 'AdminProject',
+  //   icon: 'h-icon-home',
+  //   level: (role) => role == 10000 || role == 100
+  // },
+  // {
+  //   title: '模板管理',
+  //   key: 'AdminTemplate',
+  //   icon: 'h-icon-home',
+  //   level: (role) => role == 10000 || role == 100
+  // },
+  // {
+  //   title: '备课管理',
+  //   key: 'AdminLesson-Preparation',
+  //   icon: 'h-icon-home',
+  //   level: (role) => role == 10000 || role == 100
+  // },
   {
     title: '人员管理',
     key: 'TabUser',

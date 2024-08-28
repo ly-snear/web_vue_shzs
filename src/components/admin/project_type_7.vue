@@ -25,10 +25,7 @@
 
 </template>
 <script>
-
 import Editor from '@tinymce/tinymce-vue';
-import { htmlEncodeByRegExp, htmlDecodeByRegExp } from '../../js/common/utils';
-
 export default {
     components: {
         'editor': Editor
@@ -96,14 +93,6 @@ export default {
         handleSelectionChange(){
 
         },
-
-
-
-
-
-
-
-
     },
 }
 </script>

@@ -278,7 +278,8 @@ export default {
     submit() {
       if (this.login_tab_selected == 0) {
         this.loading = true;
-        Ajax.post('/user/login', this.form).then((resp) => {
+        let url = '/photo/login';
+        Ajax.post(url, this.form).then((resp) => {
           this.loading = false;
           if (resp.ok) {
             this.go(resp.body);

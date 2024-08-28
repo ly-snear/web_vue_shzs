@@ -184,7 +184,6 @@
                 <div style="border:0px green solid;width: 100%;padding-left: 20px;padding-top: 10px;padding-right: 20px;background:#f1f1f1;float: left;">
                   <div style="width: 69%;float: left;overflow: hidden;">{{ item.content }}</div>
                   <div style="width: 30%;float: right;height: 26px;text-align: right;">
-                    <!-- <button style="width: 60px; color:#FFF;border: 0px;background-color: green;border-radius: 5px;" @click="like_discuss(item)">点赞</button> -->
                     <button style="width: 60px; color:#FFF;border: 0px;background-color: brown;border-radius: 5px;" @click="remove_discuss(item)">删除</button>
                   </div>
                 </div>
@@ -218,38 +217,36 @@ export default {
         return {
           isButtonEnabled:true,
           addResourceFrom:false,
-          //----------------------
           api_key:"",
-            loading : true,
-            rteInfo:"",
-            rteInfo_ext_title:"",
-            rteInfo_ext_content:"",
-            rteInfo_ext_id:0,
-            editId_ext:0,
-            editId:0,
-            table_data: {
-              pagination: {
-                page: 1,
-                size: 6,
-                total: 0
-              },
-              datas: []
+          loading : true,
+          rteInfo:"",
+          rteInfo_ext_title:"",
+          rteInfo_ext_content:"",
+          rteInfo_ext_id:0,
+          editId_ext:0,
+          editId:0,
+          table_data: {
+            pagination: {
+              page: 1,
+              size: 6,
+              total: 0
             },
-            disabled: false,
-            selectedFile: null,
-            user_id : 0,
-            button_name:"",
-            //---------------------
-            discussResourceFrom:false,
-            discuss_content:"",
-            table_discuss_data: {
-              pagination: {
-                page: 1,
-                size: 6,
-                total: 0
-              },
-              datas: []
+            datas: []
+          },
+          disabled: false,
+          selectedFile: null,
+          user_id : 0,
+          button_name:"",
+          discussResourceFrom:false,
+          discuss_content:"",
+          table_discuss_data: {
+            pagination: {
+              page: 1,
+              size: 6,
+              total: 0
             },
+            datas: []
+          },
         };
     },
     created() {
@@ -263,13 +260,10 @@ export default {
       this.rteInfo = "";
       this.rteInfo_ext_title = "";
       this.rteInfo_ext_content = "";
-
       let user = this.$store.getters['user'];
       this.user_id = user.id;
-
       this.getContentInfo();
       this.getPrepareState();
-
       setTimeout(()=>{
         this.init_data();
       },1000);
@@ -303,7 +297,6 @@ export default {
         };
         this.loading = true;
         Ajax.postJson(url, param).then((resp) => {
-          console.log(resp);
           this.loading = false;
           if (resp.ok) {
             this.setTable(resp.body);
@@ -316,264 +309,249 @@ export default {
         this.table_data.datas = list;
         this.table_data.pagination.total = body.length;
       },
-        onSelect(){
-
-        },
-        handleSelectionChange(){
-
-        },
-        getContentInfo(){
-          let url = '/prepare/content/get/pr?prepare='+this.pnp.id+'&project='+ this.pnp.project;
-          this.loading = true;
-          Ajax.get(url, null).then((resp) => {
-              this.loading = false;
-              console.log(resp);
-              if (resp.ok) {
-                  this.editId = resp.body.id;
-                  this.rteInfo = htmlDecodeByRegExp(resp.body.content);
-              } 
-              else{
-                  this.rteInfo = " ";
-              }
-          })
-        },
-        //保存教学资源内容
-        saveContentInfo(){
-          let content = '';
-          if (this.rteInfo && this.rteInfo.length > 0) {
-              content = htmlEncodeByRegExp(this.rteInfo);
-          }
-          let param = {
-            id:this.editId,
-            prepare:this.pnp.id,
-            project:this.pnp.project,
-            content:content,
-            praise:0,
-            share:0,
-            favorite:0,
-            reply:0,
-          };
-          console.log(param);
-          if(this.rteInfo == ""){
-            this.$Message.error("内容不允许为空！");
-            return;
-          }
-          Ajax.postJson("/prepare/content/save", param).then((resp) => {
-            if (resp.ok) {
-              HeyUI.$Message.success("保存成功！");
-            }
-          }).catch(ex => {
-            this.$Message.error(ex);
-          });
-        },
-        //保存教学扩展资源
-        saveDetail(){
-          if (this.rteInfo_ext_title.length <= 0) {
-            HeyUI.$Message.error('请输入资源标题');
-            return;
-          }
-          if (this.rteInfo_ext_content.length <= 0) {
-            HeyUI.$Message.error('请输入资源内容');
-            return;
-          }
-          let content = '';
-          if (this.rteInfo_ext_content && this.rteInfo_ext_content.length > 0) {
-              content = htmlEncodeByRegExp(this.rteInfo_ext_content);
-          }
-          let param = {
-            id: this.editId,                                              //备课项目内容ID 必须提交
-            order: this.rteInfo_ext_id,                                   //备课内容扩展序号 新增时为0 编辑时为对应的序号 必须提交 
-            title: this.rteInfo_ext_title,                                //备课内容扩展标题 必须提交
-            content: content,                            //备课项目内容扩展内容， 必须提交
-            praise: this.pnp.id,                                          //点赞数量 可选参数
-            share: 0,                                                     //分享数量 可选参数
-            favorite: 0,                                                  //收藏数量 可选参数
-            reply: 0                                                      //研讨数量
-          };
-          console.log('保存参数')
-          console.log(param)
-          Ajax.postJson("/prepare/content/ext/save", param).then((resp) => {
-              if (resp.ok) {
-                console.log('保存成功！')
-                HeyUI.$Message.success("保存成功！");
-                //this.editId = resp.body.id;
-                this.init_data();
-                this.clearContent();
-              }else{
-                console.log('保存成失败！')
-                console.log(resp.msg)
-                HeyUI.$Message.error(resp.msg);
-              }
-          }).catch(ex => {
-              this.$Message.error(ex);
-          });
-        },
-        clearDetail(){
-          this.rteInfo_ext_id = 0;
-          this.rteInfo_ext_title = "";
-          this.rteInfo_ext_content = "";
-        },
-        onTrClick(data, event, index){
-          this.getContentExtInfo(data.id,data.order)
-        },
-        getContentExtInfo(id,orderid){
-          let url = '/prepare/content/ext/get?id='+id+'&order='+ orderid
-          
-          this.loading = true;
-          Ajax.get(url, null).then((resp) => {
+      onSelect(){},
+      handleSelectionChange(){},
+      getContentInfo(){
+        let url = '/prepare/content/get/pr?prepare='+this.pnp.id+'&project='+ this.pnp.project;
+        this.loading = true;
+        Ajax.get(url, null).then((resp) => {
             this.loading = false;
             if (resp.ok) {
-              this.rteInfo_ext_title = resp.body.title;
-              this.rteInfo_ext_content = htmlDecodeByRegExp(resp.body.content);
-              this.rteInfo_ext_id = resp.body.order;
+                this.editId = resp.body.id;
+                this.rteInfo = htmlDecodeByRegExp(resp.body.content);
             } 
             else{
                 this.rteInfo = " ";
             }
-          })
-        },
-        remove(data) {
-          if(!this.isButtonEnabled){
-            HeyUI.$Message.error('当前备课已结束，不允许本操作！');
-            return;
+        })
+      },
+      //保存教学资源内容
+      saveContentInfo(){
+        let content = '';
+        if (this.rteInfo && this.rteInfo.length > 0) {
+            content = htmlEncodeByRegExp(this.rteInfo);
+        }
+        let param = {
+          id:this.editId,
+          prepare:this.pnp.id,
+          project:this.pnp.project,
+          content:content,
+          praise:0,
+          share:0,
+          favorite:0,
+          reply:0,
+        };
+        if(this.rteInfo == ""){
+          this.$Message.error("内容不允许为空！");
+          return;
+        }
+        Ajax.postJson("/prepare/content/save", param).then((resp) => {
+          if (resp.ok) {
+            HeyUI.$Message.success("保存成功！");
           }
-
-          Utils.confirm(this, '确定删除该记录 ？', (modal) => {
-            modal.close();
-            let param={};
-            param = {
-              id : data.id,
-              ids:[]
-            };
-            let ls = new Array();
-            ls.push(data.order);
-            param.ids = ls;
-            Ajax.postJson('/prepare/content/ext/delete', param).then((resp) => {
-              if (resp.ok) {
-                HeyUI.$Message.success('删除成功');
-                this.init_data();
-              }else{
-                HeyUI.$Message.error(resp.msg);
-              }
-            });
-          });
-        },
-        clearContent() {
-          this.rteInfo_ext_id = 0;
-          this.rteInfo_ext_title="";
-          this.rteInfo_ext_content="";
-        },
-        //-----------------------------------------------------------
-        toggleDiscussResourceDiv() {
-          this.discussResourceFrom = !this.discussResourceFrom;
-          if(this.discussResourceFrom){
-            this.init_discuss_data();
-          }
-        },
-        init_discuss_data(){
-          let url = '/prepare/content/reply/page';
-          let param = {
-            "substance":this.editId,                                     //备课项目内容ID 必须提交 以下的参数都是可选的
-            "pid":0,                                           //研讨ID
-            "content":"",                                      //研讨内容
-            //"user":this.user_id,                                         //发表研讨内容的用户ID
-            "user_name":"",                                    //发表研讨内容的用户姓名
-            "min_praise":-1,                                   //被点赞的最小数量
-            "max_praise":100,                                  //被点赞的最大数量
-            "min_words":0,                                     //研讨内容的最少字数
-            "max_words":100,                                   //研讨内容的最多字数
-            "min_time":"2024-02-01",                           //参与研讨的最早日期
-            "max_time":"2024-10-01",                            //参与研讨的最晚日期
-            "size":0,                                           //分页尺寸
-            "page":0                                            //分页页码
-          };
-          this.loading = true;
-          Ajax.postJson(url, param).then((resp) => {
-            this.loading = false;
-            if (resp.ok) {
-              let idx = this.table_discuss_data.pagination.page - 1;
-              let list = resp.body.data.slice(idx * 6, (idx + 1) * 6);
-              this.table_discuss_data.datas = list;
-              this.table_discuss_data.pagination.total = resp.body.data.length;
-              console.log(this.table_discuss_data.datas);
-            }
-          });
-        },
-        submit_discuss_data(){
-          let content = '';
-          if (this.discuss_content && this.discuss_content.length > 0) {
-            content = htmlEncodeByRegExp(this.discuss_content);
-          }
-          let param = {
-            "id":0,                                                   //备课项目内容研讨ID 新增时为0 编辑时为编辑的研讨ID 必须提交
-            "pid":0,                                                  //上级研讨ID 可选参数 默认0 表示顶级研讨
-            "content":this.discuss_content,                                        //研讨内容 必须提交 html内容需要编码
-            "praise":0,                                               //点赞数量 可选参数 默认0
-            "share":0,                                                //分享数量 可选参数 默认0
-            "favorite":0,                                             //收藏数量 可选参数 默认0
-            "reply":0,                                                //研讨数量 可选参数 默认0
-            "substance":this.editId                           //备课项目内容ID id=0 或者 pid=0时必须提交 pid>0为可选参数
-          };
-          console.log(param);
-          if(this.discuss_content == ""){
-            HeyUI.$Message.error("研讨内容不允许为空！");
-            return;
-          }
-          Ajax.postJson("/prepare/content/reply/save", param).then((resp) => {
+        }).catch(ex => {
+          this.$Message.error(ex);
+        });
+      },
+      //保存教学扩展资源
+      saveDetail(){
+        if (this.rteInfo_ext_title.length <= 0) {
+          HeyUI.$Message.error('请输入资源标题');
+          return;
+        }
+        if (this.rteInfo_ext_content.length <= 0) {
+          HeyUI.$Message.error('请输入资源内容');
+          return;
+        }
+        let content = '';
+        if (this.rteInfo_ext_content && this.rteInfo_ext_content.length > 0) {
+            content = htmlEncodeByRegExp(this.rteInfo_ext_content);
+        }
+        let param = {
+          id: this.editId,                                              //备课项目内容ID 必须提交
+          order: this.rteInfo_ext_id,                                   //备课内容扩展序号 新增时为0 编辑时为对应的序号 必须提交 
+          title: this.rteInfo_ext_title,                                //备课内容扩展标题 必须提交
+          content: content,                            //备课项目内容扩展内容， 必须提交
+          praise: this.pnp.id,                                          //点赞数量 可选参数
+          share: 0,                                                     //分享数量 可选参数
+          favorite: 0,                                                  //收藏数量 可选参数
+          reply: 0                                                      //研讨数量
+        };
+        Ajax.postJson("/prepare/content/ext/save", param).then((resp) => {
             if (resp.ok) {
               HeyUI.$Message.success("保存成功！");
-              this.init_discuss_data();
-              this.discuss_content = "";
+              this.init_data();
+              this.clearContent();
+            }else{
+              HeyUI.$Message.error(resp.msg);
             }
-          }).catch(ex => {
-            HeyUI.$Message.error(ex);
+        }).catch(ex => {
+            this.$Message.error(ex);
+        });
+      },
+      clearDetail(){
+        this.rteInfo_ext_id = 0;
+        this.rteInfo_ext_title = "";
+        this.rteInfo_ext_content = "";
+      },
+      onTrClick(data, event, index){
+        this.getContentExtInfo(data.id,data.order)
+      },
+      getContentExtInfo(id,orderid){
+        let url = '/prepare/content/ext/get?id='+id+'&order='+ orderid
+        
+        this.loading = true;
+        Ajax.get(url, null).then((resp) => {
+          this.loading = false;
+          if (resp.ok) {
+            this.rteInfo_ext_title = resp.body.title;
+            this.rteInfo_ext_content = htmlDecodeByRegExp(resp.body.content);
+            this.rteInfo_ext_id = resp.body.order;
+          } 
+          else{
+              this.rteInfo = " ";
+          }
+        })
+      },
+      remove(data) {
+        if(!this.isButtonEnabled){
+          HeyUI.$Message.error('当前备课已结束，不允许本操作！');
+          return;
+        }
+
+        Utils.confirm(this, '确定删除该记录 ？', (modal) => {
+          modal.close();
+          let param={};
+          param = {
+            id : data.id,
+            ids:[]
+          };
+          let ls = new Array();
+          ls.push(data.order);
+          param.ids = ls;
+          Ajax.postJson('/prepare/content/ext/delete', param).then((resp) => {
+            if (resp.ok) {
+              HeyUI.$Message.success('删除成功');
+              this.init_data();
+            }else{
+              HeyUI.$Message.error(resp.msg);
+            }
           });
-        },
-        //研讨-点赞
-        like_discuss(data) {
+        });
+      },
+      clearContent() {
+        this.rteInfo_ext_id = 0;
+        this.rteInfo_ext_title="";
+        this.rteInfo_ext_content="";
+      },
+      //-----------------------------------------------------------
+      toggleDiscussResourceDiv() {
+        this.discussResourceFrom = !this.discussResourceFrom;
+        if(this.discussResourceFrom){
+          this.init_discuss_data();
+        }
+      },
+      init_discuss_data(){
+        let url = '/prepare/content/reply/page';
+        let param = {
+          "substance":this.editId,                                     //备课项目内容ID 必须提交 以下的参数都是可选的
+          "pid":0,                                           //研讨ID
+          "content":"",                                      //研讨内容
+          "user_name":"",                                    //发表研讨内容的用户姓名
+          "min_praise":-1,                                   //被点赞的最小数量
+          "max_praise":100,                                  //被点赞的最大数量
+          "min_words":0,                                     //研讨内容的最少字数
+          "max_words":100,                                   //研讨内容的最多字数
+          "min_time":"2024-02-01",                           //参与研讨的最早日期
+          "max_time":"2024-10-01",                            //参与研讨的最晚日期
+          "size":0,                                           //分页尺寸
+          "page":0                                            //分页页码
+        };
+        this.loading = true;
+        Ajax.postJson(url, param).then((resp) => {
+          this.loading = false;
+          if (resp.ok) {
+            let idx = this.table_discuss_data.pagination.page - 1;
+            let list = resp.body.data.slice(idx * 6, (idx + 1) * 6);
+            this.table_discuss_data.datas = list;
+            this.table_discuss_data.pagination.total = resp.body.data.length;
+          }
+        });
+      },
+      submit_discuss_data(){
+        let content = '';
+        if (this.discuss_content && this.discuss_content.length > 0) {
+          content = htmlEncodeByRegExp(this.discuss_content);
+        }
+        let param = {
+          "id":0,                                                   //备课项目内容研讨ID 新增时为0 编辑时为编辑的研讨ID 必须提交
+          "pid":0,                                                  //上级研讨ID 可选参数 默认0 表示顶级研讨
+          "content":this.discuss_content,                                        //研讨内容 必须提交 html内容需要编码
+          "praise":0,                                               //点赞数量 可选参数 默认0
+          "share":0,                                                //分享数量 可选参数 默认0
+          "favorite":0,                                             //收藏数量 可选参数 默认0
+          "reply":0,                                                //研讨数量 可选参数 默认0
+          "substance":this.editId                           //备课项目内容ID id=0 或者 pid=0时必须提交 pid>0为可选参数
+        };
+        console.log(param);
+        if(this.discuss_content == ""){
+          HeyUI.$Message.error("研讨内容不允许为空！");
+          return;
+        }
+        Ajax.postJson("/prepare/content/reply/save", param).then((resp) => {
+          if (resp.ok) {
+            HeyUI.$Message.success("保存成功！");
+            this.init_discuss_data();
+            this.discuss_content = "";
+          }
+        }).catch(ex => {
+          HeyUI.$Message.error(ex);
+        });
+      },
+      //研讨-点赞
+      like_discuss(data) {
+        let param={};
+        param = {
+          id : data.id
+        };
+        Ajax.post('/prepare/content/reply/praise', param).then((resp) => {
+          if (resp.ok) {
+            HeyUI.$Message.success('点赞成功');
+            this.init_discuss_data();
+          }else{
+            HeyUI.$Message.error(resp.msg);
+          }
+        });
+      },
+      //研讨-删除
+      remove_discuss(data) {
+        if(!this.isButtonEnabled){
+          HeyUI.$Message.error('当前备课已结束，不允许本操作！');
+          return;
+        }
+        Utils.confirm(this, '确定删除该记录 ？', (modal) => {
+          modal.close();
           let param={};
           param = {
             id : data.id
           };
-          Ajax.post('/prepare/content/reply/praise', param).then((resp) => {
+          Ajax.post('/prepare/content/reply/delete', param).then((resp) => {
             if (resp.ok) {
-              HeyUI.$Message.success('点赞成功');
+              HeyUI.$Message.success('删除成功');
               this.init_discuss_data();
             }else{
               HeyUI.$Message.error(resp.msg);
             }
           });
-        },
-        //研讨-删除
-        remove_discuss(data) {
-          if(!this.isButtonEnabled){
-            HeyUI.$Message.error('当前备课已结束，不允许本操作！');
-            return;
-          }
-
-          Utils.confirm(this, '确定删除该记录 ？', (modal) => {
-            modal.close();
-            let param={};
-            param = {
-              id : data.id
-            };
-            Ajax.post('/prepare/content/reply/delete', param).then((resp) => {
-              if (resp.ok) {
-                HeyUI.$Message.success('删除成功');
-                this.init_discuss_data();
-              }else{
-                HeyUI.$Message.error(resp.msg);
-              }
-            });
-          });
-        },
-        clear_discuss_from(){
-          this.discussResourceFrom = false;
-          this.discuss_content = "";
-        },
-        toggleAddResourceDiv() {
-          this.addResourceFrom = !this.addResourceFrom;
-        },
+        });
+      },
+      clear_discuss_from(){
+        this.discussResourceFrom = false;
+        this.discuss_content = "";
+      },
+      toggleAddResourceDiv() {
+        this.addResourceFrom = !this.addResourceFrom;
+      },
 
 
 

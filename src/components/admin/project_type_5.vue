@@ -83,7 +83,6 @@ export default {
     data() {
       return {
         isButtonEnabled:true,
-        //----------------------
         if_childs:0,
         form:{
           content:"",
@@ -105,17 +104,12 @@ export default {
           closeOnMask: false,
         },
         pid:0,
-
       };
     },
     created() {
-        console.log("参数：");
-        console.log(this.pnp);
         this.getDetail();
     },
-    mounted(){
-
-    },
+    mounted(){},
     methods: {
       getPrepareState(){
         this.loading = true;
@@ -130,13 +124,11 @@ export default {
       },
       // 添加div的方法
       addDiv(pid) {
-        console.log(pid);
         let url = '/prepare/reply/page';
         let param = {
           prepare:this.pnp.id,                        //备课ID 必须提交 以下的参数都是可选的
           pid:pid,                                           //研讨ID
           content:"",                                      //研讨内容
-          //"user":75,                                         //发表研讨内容的用户ID
           user_name:"",                                    //发表研讨内容的用户姓名
           min_praise:-1,                                   //被点赞的最小数量
           max_praise:100,                                  //被点赞的最大数量
@@ -167,7 +159,6 @@ export default {
           prepare:this.pnp.id,                        //备课ID 必须提交 以下的参数都是可选的
           pid:0,                                           //研讨ID
           content:"",                                      //研讨内容
-          //"user":75,                                         //发表研讨内容的用户ID
           user_name:"",                                    //发表研讨内容的用户姓名
           min_praise:-1,                                   //被点赞的最小数量
           max_praise:100,                                  //被点赞的最大数量
@@ -178,10 +169,8 @@ export default {
           size:0,                                          //分页尺寸
           page:0                                           //分页页码
         };
-        console.log(param);
         this.loading = true;
         Ajax.postJson(url, param).then((resp) => {
-          console.log(resp)
           this.loading = false;
           if (resp.ok) {
             let idx = this.table_data.pagination.page - 1;
@@ -263,14 +252,6 @@ export default {
         this.pid = pid;
         this.commentDialogVisible = true;
       },
-
-
-
     },
-
 }
 </script>
-
-<style lang='less' scoped>
-
-</style>  
